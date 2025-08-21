@@ -1,0 +1,33 @@
+/* src/assets/main.css */
+@import './base.css'; /* este archivo importa las utilidades de tailwind*/
+
+/* Estilos base para el modo claro */
+body {
+  @apply bg-background-light text-text-light transition-colors duration-500 ease-in-out;
+}
+
+/* Estilos para el modo oscuro, aplicados cuando la clase 'dark' está presente */
+.dark body {
+  @apply bg-background-dark text-text-dark;
+}
+
+/* Configuración de jerarquía de tipografía */
+/*Titulo procipal*/
+h1,
+.h1 {
+  @apply text-4xl font-bold;
+}
+/*Titulod e seccion*/
+h2,
+.h2 {
+  @apply text-3xl font-semibold;
+}
+/*subtitulo*/
+h3,
+.h3 {
+  @apply text-2xl font-semibold;
+}
+/*texto nomal*/
+p {
+  @apply text-base;
+}
