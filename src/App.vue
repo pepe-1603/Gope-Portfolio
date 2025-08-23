@@ -132,15 +132,15 @@ watch(
   { immediate: true },
 )
 
-// Manejar el loader de rutas
-router.beforeEach((to, from, next) => {
-  uiStore.setLoading(true) // Activa el loader antes de la navegación
-  next()
-})
+// // Manejar el loader de rutas
+// router.beforeEach((to, from, next) => {
+//   uiStore.setLoading(true) // Activa el loader antes de la navegación
+//   next()
+// })
 
-router.afterEach(() => {
-  uiStore.setLoading(false) // Desactiva el loader una vez la navegación ha terminado
-})
+// router.afterEach(() => {
+//   uiStore.setLoading(false) // Desactiva el loader una vez la navegación ha terminado
+// })
 
 // Verificación inicial
 onMounted(() => {
@@ -160,7 +160,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
-    <UiLoader />
+    <!-- <UiLoader /> -->
     <ToastContainer />
     <ModalContainer />
 

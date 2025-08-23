@@ -1,10 +1,35 @@
 // src/services/projectService.js
 
-import supabase from '../lib/supabaseClient' // O la ruta correcta a tu supabaseClient.js
+import supabase from '@/lib/supabaseClient' // O la ruta correcta a tu supabaseClient.js
 
 const PROJECTS_TABLE = 'projects'
 
 export const projectService = {
+  /**
+   * Obtiene los proyectos por página.
+   * @param {number} pageNumber - El número de página a cargar.
+   * @param {number} projectsPerPage - La cantidad de proyectos por página.
+   * @returns {Promise<Array>} - Una promesa que resuelve con la lista de proyectos.
+   */
+  async getProjectsByPage(pageNumber, projectsPerPage) {
+    const start = (pageNumber - 1) * projectsPerPage
+    const end = start + projectsPerPage - 1
+
+    try {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*') // O las columnas que necesites
+        .range(start, end)
+        .order('created_at', { ascending: false }) // Ordena por fecha de creación
+
+      if (error) throw error
+      return data
+    } catch (error) {
+      console.error('Error getting projects by page:', error)
+      throw error
+    }
+  },
+
   // READ (Público)
   getAllPublishedProjects: async () => {
     const { data, error } = await supabase

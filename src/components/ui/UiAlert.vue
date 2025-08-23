@@ -1,7 +1,7 @@
 <template>
   <div v-if="isVisible" :class="styles">
-    <div class="flex-shrink-0">
-      <font-awesome-icon :icon="iconForIntent" class="w-5 h-5" />
+    <div class="flex-shrink-0 self-start">
+      <font-awesome-icon :icon="iconForIntent" class="w-5 h-5 opacity-70" />
     </div>
 
     <div class="flex-1 ml-3">
@@ -41,6 +41,7 @@ import { alertStyles, type AlertVariants } from '../../utils/alertStyles'
 // Importamos solo los íconos que vamos a usar en este componente
 import {
   faCircleInfo,
+  faTriangleExclamation,
   faCircleCheck,
   faCircleExclamation,
   faCircleXmark,
@@ -63,11 +64,11 @@ const iconForIntent = computed(() => {
     case 'success':
       return faCircleCheck
     case 'warning':
-      return faCircleExclamation
+      return faTriangleExclamation
     case 'danger':
       return faCircleXmark
     default:
-      return faCircleInfo
+      return faCircleExclamation
   }
 })
 

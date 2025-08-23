@@ -1,5 +1,7 @@
 <template>
-  <div class="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800 dark:text-gray-200">
+  <div
+    class="rounded-lg bg-white dark:bg-gray-800 dark:text-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+  >
     <div v-if="$slots.header" class="mb-4">
       <slot name="header"></slot>
     </div>
