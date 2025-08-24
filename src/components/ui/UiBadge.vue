@@ -1,7 +1,8 @@
 <template>
   <span :class="badgeClasses">
-    <div v-if="IconComponent" :class="iconContainerClasses">
-      <component :is="IconComponent" :class="iconSizeClasses" />
+    <div v-if="icon" :class="iconContainerClasses">
+      <img v-if="typeof icon === 'string'" :src="icon" alt="" class="w-7 h-7 object-contain" />
+      <component v-else :is="icon" :class="iconSizeClasses" />
     </div>
 
     {{ text }}
@@ -10,14 +11,14 @@
 
 <script setup lang="ts">
 import { computed, withDefaults } from 'vue'
-import { badgeStyles, type BadgeVariants } from '../../utils/badgeStyles'
+import { badgeStyles, type BadgeVariants } from '@/utils/badgeStyles'
 
 interface UiBadgeProps {
   text: string
   color?: BadgeVariants['color']
   size?: BadgeVariants['size']
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  icon?: object | Function | null
+  // La prop 'icon' ahora acepta un string (URL) o un componente de Vue
+  icon?: string | object | Function | null
 }
 
 const props = withDefaults(defineProps<UiBadgeProps>(), {
@@ -64,6 +65,4 @@ const badgeClasses = computed<string>(() => {
     size: props.size,
   })
 })
-
-const IconComponent = computed(() => props.icon)
 </script>

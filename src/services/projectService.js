@@ -46,30 +46,37 @@ export const projectService = {
   },
 
   // READ (Público)
+  /**
+   * Obtiene un proyecto por su slug utilizando una función de base de datos que retorna un json directamente.
+   * @param {string} slug - El slug del proyecto a obtener.
+   * @returns {Promise<Object>} - Una promesa que resuelve con el proyecto y sus tecnologías.
+   */
   getProjectBySlug: async (slug) => {
-    const { data, error } = await supabase
-      .from(PROJECTS_TABLE)
-      .select(
-        `
-        *,
-        project_techs (
-          techs (
-            id,
-            name,
-            icon_url
-          )
-        )
-      `,
-      )
-      .eq('slug', slug)
-      .eq('is_published', true) // Solo si el proyecto está publicado
-      .single() // Esperamos solo un resultado
+    try {
+      //v1:
+      //const { data, error } = await supabase.rpc('get_project_with_techs_by_slug', { p_slug: slug })
+      //.single() // Usamos .single() porque esperamos un solo proyecto
 
-    if (error) {
-      console.error(`Error al obtener proyecto por slug ${slug}:`, error.message)
+      //v2:
+      const { data, error } = await supabase.rpc('get_project_with_techs_by_slug_v2', {
+        p_slug: slug,
+      })
+
+      if (error) {
+        console.error(`Error al obtener proyecto por slug ${slug}:`, error.message)
+        throw error
+      }
+
+      //console.log('🧪 Data RPC:', data[0]) // Asegúrate de ver el contenido
+      //return data[0] // Devuelve manualmente el primer (y único) elemento
+
+      console.log('🚀 Nuevo JSON:', data)
+      // Retorna directamente el objeto JSON
+      return data
+    } catch (error) {
+      console.error(`Error en la llamada RPC para el slug ${slug}:`, error.message)
       throw error
     }
-    return data
   },
 
   // CREATE (Administración)

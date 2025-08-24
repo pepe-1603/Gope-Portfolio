@@ -10,7 +10,7 @@
             >Proyectos</router-link
           >
           <router-link
-            to="/sobre-mi"
+            to="/about"
             class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
             >Sobre Mí</router-link
           >
@@ -33,7 +33,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
 import { RouterView } from 'vue-router'
 
