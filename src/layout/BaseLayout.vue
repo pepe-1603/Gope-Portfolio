@@ -15,7 +15,7 @@
             >Sobre Mí</router-link
           >
           <span>
-            <ThemeSwitch size="sm" />
+            <ThemeSwitch />
           </span>
         </div>
       </nav>
