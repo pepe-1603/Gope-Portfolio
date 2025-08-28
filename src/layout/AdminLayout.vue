@@ -1,0 +1,86 @@
+<template>
+  <div class="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <aside class="w-64 bg-white dark:bg-gray-800 shadow-lg p-6 flex flex-col">
+      <div class="text-2xl font-bold mb-8 text-indigo-600 dark:text-indigo-400">Admin Panel</div>
+      <nav class="flex-grow">
+        <ul class="space-y-2">
+          <li>
+            <router-link
+              to="/admin"
+              class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-gauge-high" />
+              <span>Dashboard</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              to="/admin/projects"
+              class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-list-check" />
+              <span>Proyectos</span>
+            </router-link>
+          </li>
+          <li>
+            <router-link
+              to="/admin/technologies"
+              class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-microchip" />
+              <span>Tecnologías</span>
+            </router-link>
+          </li>
+        </ul>
+      </nav>
+      <UiButton @click="handleLogout" variant="danger" class="w-full">
+        <font-awesome-icon icon="fa-solid fa-right-from-bracket" class="mr-2" />
+        Cerrar Sesión
+      </UiButton>
+    </aside>
+
+    <main class="flex-grow p-6 overflow-y-auto">
+      <RouterView />
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { RouterView, useRouter } from 'vue-router'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import {
+  faGaugeHigh,
+  faListCheck,
+  faMicrochip,
+  faRightFromBracket,
+} from '@fortawesome/free-solid-svg-icons'
+import { useToastStore } from '@/stores/toast'
+import UiButton from '@/components/ui/UiButton.vue'
+import { login, logout } from '@/services/auhtService.ts'
+
+// Add the icons you want to use in the layout
+library.add(faGaugeHigh, faListCheck, faMicrochip, faRightFromBracket)
+
+const router = useRouter()
+const toastStore = useToastStore()
+
+const handleLogout = async () => {
+  try {
+    await logout() // This function needs to be implemented in your authService.ts
+    toastStore.addToast({
+      message: 'Sesión cerrada correctamente.',
+      type: 'success',
+    })
+    router.push({ name: 'admin-login' })
+  } catch (error) {
+    toastStore.addToast({
+      message: 'Error al cerrar sesión. Por favor, inténtalo de nuevo.',
+      type: 'error',
+    })
+  }
+}
+</script>

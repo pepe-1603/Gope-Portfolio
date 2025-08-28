@@ -1,20 +1,27 @@
-// En src/services/authService.ts
-import { useToastStore } from '@/stores/toast'
+// src/services/authService.ts
+import supabase from '@/lib/supabaseClient'
 
 export const login = async (credentials) => {
-  const toastStore = useToastStore()
-  try {
-    // Lógica de autenticación
-    // ...
-    toastStore.addToast({
-      message: '¡Bienvenido! Has iniciado sesión.',
-      type: 'success',
-      duration: 5000,
-    })
-  } catch (error) {
-    toastStore.addToast({
-      message: 'Error en el login. Por favor, revisa tus credenciales.',
-      type: 'error',
-    })
+  const { data, error } = await supabase.auth.signInWithPassword(credentials)
+
+  if (error) {
+    throw error
   }
+
+  return data.user
+}
+
+export const logout = async () => {
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    throw error
+  }
+}
+
+export const getCurrentUser = async () => {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  return user
 }

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { useToastStore } from '@/stores/toast'
 import BaseLayout from '@/layout/BaseLayout.vue'
+import AdminLayout from '@/layout/AdminLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,12 +35,26 @@ const router = createRouter({
         },
       ],
     },
-    // Podrías tener otro layout para el panel de administración
-    // {
-    //   path: '/admin',
-    //   component: AdminLayout,
-    //   children: [ ... ]
-    // }
+    // Rutas del panel de administración
+    {
+      path: '/admin',
+      component: AdminLayout,
+      meta: { requiresAuth: true }, // Etiqueta esta ruta como protegida
+      children: [
+        {
+          path: '', // admin/dashboard
+          name: 'admin-dashboard',
+          component: () => import('@/views/admin/AdminDashboard.vue'),
+        },
+        // Aquí irán las rutas anidadas para gestionar proyectos y tecnologías
+      ],
+    },
+    // Ruta para el login de administrador
+    {
+      path: '/admin/login',
+      name: 'admin-login',
+      component: () => import('@/views/auth/AdminLoginView.vue'),
+    },
   ],
 })
 
