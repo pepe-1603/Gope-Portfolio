@@ -14,6 +14,13 @@
             class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
             >Sobre Mí</router-link
           >
+
+          <router-link
+            to="/admin"
+            class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
+            >ADmin Panel</router-link
+          >
+
           <span>
             <ThemeSwitch />
           </span>

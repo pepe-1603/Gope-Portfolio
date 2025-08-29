@@ -1,4 +1,6 @@
-<script setup lang="ts">
+
+<script setup lang="ts" name="=PreviewComnponets">
+// pagina depruebna par acompeontes test
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
 import UiAlert from '@/components/ui/UiAlert.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
@@ -95,6 +97,107 @@ const settings = ref({
   notifications: true,
   betaFeatures: false,
 })
+
+/**
+ *
+ * <template>
+  <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-6">
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Acceso de Administrador</h2>
+    </div>
+    <form @submit.prevent="handleLogin" class="space-y-4">
+      <UiFormField
+        id="email"
+        label="Email"
+        type="email"
+        v-model="email"
+        placeholder="email@ejemplo.com"
+        :errorMessage="errors.email"
+      />
+      <UiFormField
+        id="password"
+        label="Contraseña"
+        type="password"
+        v-model="password"
+        placeholder="••••••••"
+        :errorMessage="errors.password"
+      />
+      <UiButton
+        type="submit"
+        :disabled="loading"
+        class="w-full"
+        :variant="loading ? 'disabled' : 'default'"
+      >
+        <UiSpinner v-if="loading" />
+        <span v-else>Iniciar Sesión</span>
+      </UiButton>
+    </form>
+  </div>
+</template>
+
+<script lang="ts">
+import { defineComponent, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
+import { useModal } from '@/composables/useModal'
+import UiButton from '@/components/ui/UiButton.vue'
+import UiFormField from '@/components/ui/UiFormField.vue'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
+
+export default defineComponent({
+  name: 'LoginModal',
+  components: {
+    UiButton,
+    UiFormField,
+    UiSpinner
+  },
+  setup() {
+    const router = useRouter()
+    const authStore = useAuthStore()
+    const { closeModal } = useModal()
+
+    const email = ref('')
+    const password = ref('')
+    const loading = ref(false)
+    const errors = ref({
+      email: '',
+      password: '',
+    })
+
+    const validate = () => {
+      errors.value.email = email.value ? '' : 'El email es requerido.'
+      errors.value.password = password.value ? '' : 'La contraseña es requerida.'
+      return !errors.value.email && !errors.value.password
+    }
+
+    const handleLogin = async () => {
+      if (!validate()) {
+        return
+      }
+
+      loading.value = true
+      try {
+        await authStore.login({ email: email.value, password: password.value })
+        closeModal()
+      } catch (error) {
+        // The store handles the toast for errors, so we don't need it here.
+      } finally {
+        loading.value = false
+      }
+    }
+
+    return {
+      email,
+      password,
+      loading,
+      errors,
+      handleLogin
+    }
+  }
+})
+</script>
+ */
+
 </script>
 
 <template>

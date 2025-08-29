@@ -1,67 +1,93 @@
-import { defineStore } from 'pinia'
-import { computed, ref, type Component } from 'vue'
+import { defineStore } from 'pinia';
+import { computed, ref, markRaw } from 'vue';
+import type { Component } from 'vue';
 
-// Definimos la interfaz para un modal en la pila
-interface Modal {
-  name: string
-  props?: Record<string, any>
-  closeOnClickOutside?: boolean
+// Importa todos tus componentes modales aquí
+import LoginModal from '@/components/ui/modals/LoginModal.vue';
+import ConfirmDeleteModal from '@/components/ui/modals/ConfirmDeleteModal.vue';
+import ConfirmModal from '@/components/ui/modals/ConfirmModal.vue';
+import NoInternetModal from '@/components/ui/modals/NoInternetModal.vue';
+
+
+// ... y cualquier otro que necesites
+
+// Mapea los nombres de los modales a sus componentes
+const modalComponents: Record<string, Component> = {
+  LoginModal: markRaw(LoginModal),
+  ConfirmDeleteModal: markRaw(ConfirmDeleteModal),
+  ConfirmModal: markRaw(ConfirmModal),
+  NoInternetModal: markRaw(NoInternetModal)
+  // ... y otros modales
+};
+
+interface ModalState {
+  id: number;
+  name: string;
+  props?: Record<string, any>;
+  closeOnClickOutside?: boolean;
+  resolve?: (value: any) => void;
+  reject?: (reason?: any) => void;
 }
 
-// Store de Pinia para la gestión de modales
 export const useModalStore = defineStore('modal', () => {
-  // `modalStack` guardará la pila de modales abiertos. El último en el array es el superior.
-  const modalStack = ref<Modal[]>([])
+  const modalStack = ref<ModalState[]>([]);
+  let modalIdCounter = 0;
 
-  /**
-   * Abre un modal y lo añade a la pila.
-   * @param name El nombre único del modal a abrir.
-   * @param props Opcional: Propiedades que se pasarán al componente del modal.
-   * @param closeOnClickOutside Opcional: Si el modal se puede cerrar al hacer clic fuera.
-   */
   const openModal = (
     name: string,
     props: Record<string, any> = {},
     closeOnClickOutside: boolean = true,
-  ) => {
-    // Si ya existe un modal con el mismo nombre, lo eliminamos de la pila
-    modalStack.value = modalStack.value.filter((modal) => modal.name !== name)
+  ): Promise<any> => {
+    // Retorna una promesa para que el router pueda 'esperar'
+    return new Promise((resolve, reject) => {
+      // Si el modal ya existe en la pila, lo reemplazamos
+      const existingIndex = modalStack.value.findIndex((modal) => modal.name === name);
+      if (existingIndex !== -1) {
+        modalStack.value.splice(existingIndex, 1);
+      }
 
-    // Añadimos el nuevo modal a la pila.
-    modalStack.value.push({
-      name,
-      props,
-      closeOnClickOutside,
-    })
-  }
+      modalIdCounter++;
+      const id = modalIdCounter;
 
-  /**
-   * Cierra el modal superior de la pila.
-   */
-  const closeModal = () => {
-    modalStack.value.pop()
-  }
+      // Crea el objeto del modal
+      const newModal: ModalState = {
+        id,
+        name,
+        props: { ...props, modalId: id },
+        closeOnClickOutside,
+        resolve,
+        reject,
+      };
 
-  /**
-   * Cierra todos los modales en la pila.
-   */
-  const closeAllModals = () => {
-    modalStack.value = []
-  }
+      modalStack.value.push(newModal);
+    });
+  };
 
-  /**
-   * Se usa para obtener el modal superior de la pila.
-   * Es una propiedad computada que el contenedor usará para renderizar.
-   */
+  const closeModal = (id: number, result?: any) => {
+    const index = modalStack.value.findIndex((modal) => modal.id === id);
+    if (index !== -1) {
+      const modalToClose = modalStack.value[index];
+      if (modalToClose.resolve) {
+        modalToClose.resolve(result);
+      }
+      modalStack.value.splice(index, 1);
+    }
+  };
+
   const activeModal = computed(() => {
-    return modalStack.value[modalStack.value.length - 1] || null
-  })
+    return modalStack.value[modalStack.value.length - 1] || null;
+  });
 
   return {
+    // Propiedades de estado
     modalStack,
+    activeModal,
+    // Componentes registrados
+    modalComponents,
+    // Acciones y métodos
     openModal,
     closeModal,
-    closeAllModals,
-    activeModal,
-  }
-})
+  };
+}, {
+  persist: true,
+});

@@ -16,22 +16,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, watch } from 'vue'
+import { defineComponent, watch } from 'vue';
 
 export default defineComponent({
   name: 'BaseModal',
   props: {
-    // La propiedad 'active' determina si el modal está visible o no
     active: {
       type: Boolean,
       required: true,
     },
-    // Si el modal se puede cerrar al hacer clic fuera
     closeOnClickOutside: {
       type: Boolean,
       default: true,
     },
-    // Clase adicional para el contenedor del modal, si se necesita
     containerClass: {
       type: [String, Object],
       default: '',
@@ -39,40 +36,34 @@ export default defineComponent({
   },
   emits: ['close'],
   setup(props, { emit }) {
-    const closeModal = () => {
-      emit('close')
-    }
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (props.active && event.key === 'Escape') {
+        emit('close');
+      }
+    };
 
     const closeModalOnOutsideClick = () => {
       if (props.closeOnClickOutside) {
-        closeModal()
+        emit('close');
       }
-    }
+    };
 
-    // Cerrar con la tecla Escape
-    const handleKeydown = (event: KeyboardEvent) => {
-      if (props.active && event.key === 'Escape') {
-        closeModal()
-      }
-    }
-
-    // Añadir/quitar el listener del teclado
     watch(
       () => props.active,
-      (isActive) => {
+      (isActive, wasActive) => {
         if (isActive) {
-          document.addEventListener('keydown', handleKeydown)
-        } else {
-          document.removeEventListener('keydown', handleKeydown)
+          document.addEventListener('keydown', handleKeydown);
+        } else if (wasActive) {
+          document.removeEventListener('keydown', handleKeydown);
         }
       },
-    )
+    );
 
     return {
       closeModalOnOutsideClick,
-    }
+    };
   },
-})
+});
 </script>
 
 <style scoped>

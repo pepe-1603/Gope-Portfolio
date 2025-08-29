@@ -18,6 +18,7 @@ export const profileService = {
       console.error('Error al obtener el perfil de administrador:', error.message)
       throw error
     }
+    console.log('response data-perfil :', data)
     return data
   },
 
@@ -35,4 +36,6 @@ export const profileService = {
     }
     return data[0]
   },
+
+  //demas metodos
 }

@@ -36,7 +36,7 @@
           </li>
         </ul>
       </nav>
-      <UiButton @click="handleLogout" variant="danger" class="w-full">
+      <UiButton @click="handleLogout" intent="danger" class="w-full">
         <font-awesome-icon icon="fa-solid fa-right-from-bracket" class="mr-2" />
         Cerrar Sesión
       </UiButton>
@@ -58,29 +58,16 @@ import {
   faMicrochip,
   faRightFromBracket,
 } from '@fortawesome/free-solid-svg-icons'
-import { useToastStore } from '@/stores/toast'
+import { useAuthStore } from '@/stores/authStore' // Importamos el store de auth
 import UiButton from '@/components/ui/UiButton.vue'
-import { login, logout } from '@/services/auhtService.ts'
 
-// Add the icons you want to use in the layout
 library.add(faGaugeHigh, faListCheck, faMicrochip, faRightFromBracket)
 
 const router = useRouter()
-const toastStore = useToastStore()
+const authStore = useAuthStore()
 
 const handleLogout = async () => {
-  try {
-    await logout() // This function needs to be implemented in your authService.ts
-    toastStore.addToast({
-      message: 'Sesión cerrada correctamente.',
-      type: 'success',
-    })
-    router.push({ name: 'admin-login' })
-  } catch (error) {
-    toastStore.addToast({
-      message: 'Error al cerrar sesión. Por favor, inténtalo de nuevo.',
-      type: 'error',
-    })
-  }
+  await authStore.logout()
+  router.push({ name: 'home' }) // Redirigimos a una ruta pública, ya que la de login ya no existe
 }
 </script>

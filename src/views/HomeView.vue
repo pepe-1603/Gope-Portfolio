@@ -49,11 +49,16 @@
           </button>
         </router-link>
       </div>
+
+      <LoginForm />
     </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
+import LoginForm from '@/components/LoginForm.vue';
+
 // No se necesita lógica específica en el script para esta landing page estática.
 </script>
 
