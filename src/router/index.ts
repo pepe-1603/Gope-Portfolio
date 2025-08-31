@@ -2,11 +2,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import BaseLayout from '@/layout/BaseLayout.vue'
 import AdminLayout from '@/layout/AdminLayout.vue'
-import { useAuthStore } from '@/stores/authStore'
-import { useToastStore } from '@/stores/toast'
-import { useGlobalModal } from '@/composables/useGlobalModal'
-import AuthInfoModal from '@/components/ui/modals/AuthInfoModal.vue'
 import { nextTick } from 'vue'
+import AuthLayout from '@/layout/AuthLayout.vue'
+import AuthHomeView from '@/views/auth/AuthHomeView.vue'
+import { handleAuthGuards } from '@/composables/useRouterAuth'
 
 
 const router = createRouter({
@@ -51,57 +50,29 @@ const router = createRouter({
       ],
     },
     {
-      path: '/admin-login',
-      name: 'admin-login',
-      component: () => import('@/views/auth/AdminLoginView.vue'),
+      path: '/auth',
+      component: AuthLayout,
+      children: [
+        {
+          path: '', // La ruta vacía (o "") hace que sea la vista por defecto para /auth
+          name: 'auth-home',
+          component: AuthHomeView,
+        },
+        {
+          path: '/login',
+          name: 'login',
+          component: () => import('@/views/auth/AdminLoginView.vue'),
+        },
+      ],
     },
+    {
+      path: '/:catchAll(.*)',
+      name: 'NotFound',
+      component: () => import('@/views/NotFoundView.vue') // O el nombre de tu vista 404
+    }
   ],
 })
 
-router.beforeEach(async (to, from, next) => {
-  const toastStore = useToastStore()
-  const authStore = useAuthStore()
-  const $modal = useGlobalModal();
-
-  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
-  const requiredRole = to.meta.requiredRole
-
-  if (requiresAuth) {
-    if (!authStore.isAuthenticated) {
-      toastStore.addToast({
-        message: 'Necesitas iniciar sesión para acceder al panel de administración.',
-        type: 'warning',
-        duration: 6000,
-      })
-
-      try {
-        const modalResult = await $modal.showModal(
-          AuthInfoModal,
-          {},
-          { closeOnClickOutside: false }
-        );
-
-        if (modalResult?.action === 'confirm' && modalResult.payload?.accepted) {
-          next({ name: 'admin-login' });
-        } else {
-          next({ name: 'home' });
-        }
-      } catch (error) {
-        next({ name: 'home' });
-      }
-    } else if (requiredRole && (!authStore.profile || authStore.profile.role !== requiredRole)) {
-      toastStore.addToast({
-        message: 'No tienes permisos de administrador para acceder a esta sección.',
-        type: 'error',
-        duration: 6000,
-      })
-      next({ name: 'home' })
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
-})
+router.beforeEach(handleAuthGuards)
 
 export default router

@@ -4,31 +4,14 @@
       <nav class="container mx-auto p-4 flex justify-between items-center">
         <router-link to="/" class="text-2xl font-bold dark:text-white">Mi Portafolio</router-link>
         <div class="flex items-center space-x-4">
-          <router-link
-            to="/proyectos"
-            class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-            >Proyectos</router-link
-          >
-          <router-link
-            to="/about"
-            class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-            >Sobre Mí</router-link
-          >
 
-          <router-link
-            to="/admin"
-            class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-            >ADmin Panel</router-link
-          >
-
-          <span>
             <ThemeSwitch />
-          </span>
+
         </div>
       </nav>
     </header>
 
-    <main class="flex-grow w-full mx-auto ">
+    <main class="flex-grow w-full mx-auto">
       <RouterView class="p-6"/>
     </main>
 

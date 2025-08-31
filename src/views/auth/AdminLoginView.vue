@@ -23,13 +23,14 @@
             :errorMessage="errors.password"
           />
         </div>
-        <div class="flex items-center justify-evenly">
+        <div class="w-full flex items-center justify-evenly">
           <UiButton
             type="submit"
+            class="w-1/2"
             :disabled="loading"
             :variant="loading ? 'disabled' : 'default'"
           >
-            <UiSpinner v-if="loading" />
+            <UiSpinner v-if="loading" message="loading"/>
             <span v-else>Iniciar Sesión</span>
           </UiButton>
           <UiButton

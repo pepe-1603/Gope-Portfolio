@@ -27,6 +27,7 @@ pinia.use(piniaPluginPersistedstate)
 app.use(pinia)
 
 // 3. Ahora puedes usar el store de forma segura
+// Carga el estado de autenticación antes de montar la app
 const authStore = useAuthStore()
 await authStore.checkAuth()
 
