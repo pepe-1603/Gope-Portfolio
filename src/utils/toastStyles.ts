@@ -2,7 +2,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 export const toastStyles = cva(
   // Clases base para el toast
-  'w-fit rounded-md p-4 text-sm font-medium shadow-md flex items-center transition-all duration-400 bg-gray-50 dark:bg-gray-700',
+  'w-fit rounded-md p-4 text-sm font-medium shadow-md flex items-center transition-all duration-400 bg-gray-50 dark:bg-gray-700 border-2',
   {
     variants: {
       // Definimos los tipos de toast (intent).
