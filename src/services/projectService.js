@@ -45,6 +45,21 @@ export const projectService = {
     return data
   },
 
+  // READ (Administración)
+// Añadir método para obtener todos los proyectos sin importar si están publicados o no.
+getAllProjects: async () => {
+  const { data, error } = await supabase
+    .from(PROJECTS_TABLE)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error al obtener todos los proyectos:', error.message);
+    throw error;
+  }
+  return data;
+},
+
   // READ (Público)
   /**
    * Obtiene un proyecto por su slug utilizando una función de base de datos que retorna un json directamente.

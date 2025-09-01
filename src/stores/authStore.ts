@@ -29,7 +29,6 @@ export const useAuthStore = defineStore(
       if (currentUser) {
         // Obtenemos el perfil si el usuario existe
         console.log('✅ Autenticación verificada. El usuario está logueado.')
-
         const userProfile = await profileService.getAdminProfile(currentUser.id)
         setUserAndProfile(currentUser, userProfile)
       } else {

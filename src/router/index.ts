@@ -47,6 +47,17 @@ const router = createRouter({
           name: 'admin-dashboard',
           component: () => import('@/views/admin/AdminDashboard.vue'),
         },
+        // ✅ CORRECCIÓN: La ruta anidada no lleva barra inicial
+        {
+          path: 'projects',
+          name: 'admin-projects',
+          component: () => import('@/views/admin/ProjectManagementView.vue'),
+        },
+        // ✅ AÑADIDO: Ruta anidada para tecnologías
+        /*{
+          path: 'technologies',
+          name: 'admin-techs',component: () => import('@/views/admin/ProjectManagementView.vue'),
+        },*/
       ],
     },
     {

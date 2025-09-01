@@ -6,7 +6,7 @@
         <ul class="space-y-2">
           <li>
             <router-link
-              to="/admin"
+              to=""
               class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
             >
