@@ -7,29 +7,23 @@
           <router-link
             to="/proyectos"
             class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-            >Proyectos</router-link
-          >
+          >Proyectos</router-link>
           <router-link
             to="/about"
             class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-            >Sobre Mí</router-link
-          >
-
+          >Sobre Mí</router-link>
           <router-link
             to="/admin"
             class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
-            >ADmin Panel</router-link
-          >
+          >Admin Panel</router-link>
 
-          <span>
-            <ThemeSwitch />
-          </span>
+          <SettingsDropdown />
         </div>
       </nav>
     </header>
 
-    <main class="flex-grow w-full mx-auto ">
-      <RouterView class="p-6"/>
+    <main class="flex-grow w-full mx-auto">
+      <RouterView class="p-6" />
     </main>
 
     <footer
@@ -41,8 +35,6 @@
 </template>
 
 <script setup lang="ts">
-import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
-import { RouterView } from 'vue-router'
-
-// No necesitas script si solo contiene HTML/CSS
+import { RouterView } from 'vue-router';
+import SettingsDropdown from '@/components/common/SettingsDropdown.vue';
 </script>

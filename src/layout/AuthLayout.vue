@@ -3,16 +3,15 @@
     <header class="bg-white dark:bg-gray-800 shadow-md">
       <nav class="container mx-auto p-4 flex justify-between items-center">
         <router-link to="/" class="text-2xl font-bold dark:text-white">Mi Portafolio</router-link>
+
         <div class="flex items-center space-x-4">
-
-            <ThemeSwitch />
-
+          <SettingsDropdown />
         </div>
       </nav>
     </header>
 
-    <main class="flex-grow w-full mx-auto">
-      <RouterView class="p-6"/>
+    <main class="flex-grow w-full mx-auto p-6 flex items-center justify-center">
+      <RouterView />
     </main>
 
     <footer
@@ -24,8 +23,6 @@
 </template>
 
 <script setup lang="ts">
-import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
-import { RouterView } from 'vue-router'
-
-// No necesitas script si solo contiene HTML/CSS
+import { RouterView } from 'vue-router';
+import SettingsDropdown from '@/components/common/SettingsDropdown.vue';
 </script>

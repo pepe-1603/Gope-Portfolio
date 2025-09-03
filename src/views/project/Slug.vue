@@ -1,13 +1,17 @@
 <template>
+    <div v-if="errorFetch" class="mt-8 contianer mx-auto p-6">
+    <UiAlert intent="danger" title="Error" :description="errorFetch" dismissible/>
+  </div>
   <section class="max-w-4xl mx-auto px-6 py-12" v-if="project">
     <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
       {{ project.title }}
+      <UiBadge pointer :color="project.is_published ? 'green' : 'orange'" size="xs" :text="project.is_published ? 'público' : 'privado'" />
     </h1>
     <img
       v-if="project.image_url"
       :src="project.image_url"
       :alt="project.title"
-      class="w-full h-64 object-cover rounded-lg mb-6 shadow-md"
+      class="w-full min-h-64 max-h-80 object-cover rounded-lg mb-6 shadow-md"
     />
 
     <p class="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed font-semibold">
@@ -53,30 +57,44 @@
 
   <ProjectDetailSkeleton v-else />
 </template>
-
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { projectService } from '@/services/projectService.js'
-import UiBadge from '@/components/ui/UiBadge.vue'
-import ProjectDetailSkeleton from '@/components/ui/skeletons/ProjectDetailSkeleton.vue'
-import { faLink } from '@fortawesome/free-solid-svg-icons'
-import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { getTechColor } from '@/utils/badgeStyles'
-import UiCollapsible from '@/components/ui/UiCollapsible.vue'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { projectService } from '@/services/projectService.ts';
+import UiBadge from '@/components/ui/UiBadge.vue';
+import ProjectDetailSkeleton from '@/components/ui/skeletons/ProjectDetailSkeleton.vue';
+import { faLink } from '@fortawesome/free-solid-svg-icons';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { getTechColor } from '@/utils/badgeStyles';
+import UiCollapsible from '@/components/ui/UiCollapsible.vue';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import type { ProjectWithTechs } from '@/types/project';
+import UiAlert from '@/components/ui/UiAlert.vue';
 
-import { library } from '@fortawesome/fontawesome-svg-core'
+library.add(faGithub, faLink);
 
-library.add(faGithub, faLink)
-
-const route = useRoute()
-const project = ref(null)
+const route = useRoute();
+const errorFetch = ref('Error Unknow' )
+// Inicializamos la referencia a `null`
+const project = ref<ProjectWithTechs | null>(null);
 
 onMounted(async () => {
   try {
-    project.value = await projectService.getProjectBySlug(route.params.slug)
+    const slug = route.params.slug as string;
+
+    // Aquí es donde obtenemos los datos
+    const fetchedProject = await projectService.getProjectBySlug(slug);
+
+    // Si los datos se obtuvieron con éxito, los asignamos
+    if (fetchedProject) {
+      project.value = fetchedProject;
+    }
+
   } catch (err) {
-    console.error('Error cargando proyecto:', err)
+    console.error('Error cargando proyecto:', err);
+    // En caso de error, aseguramos que la referencia sea `null`
+    errorFetch.value = err;
+    project.value = null;
   }
-})
+});
 </script>

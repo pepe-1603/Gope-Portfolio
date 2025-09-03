@@ -54,10 +54,27 @@ const router = createRouter({
           component: () => import('@/views/admin/ProjectManagementView.vue'),
         },
         // ✅ AÑADIDO: Ruta anidada para tecnologías
-        /*{
+        {
           path: 'technologies',
-          name: 'admin-techs',component: () => import('@/views/admin/ProjectManagementView.vue'),
-        },*/
+          name: 'admin-techs',
+          component: () => import('@/views/admin/TechManagementView.vue'),
+        },
+        {
+          // ✅ NUEVA RUTA: Ruta para la configuración de admin
+          path: 'settings',
+          name: 'admin-settings',
+          component: () => import('../views/admin/AdminSettingsView.vue'),
+        },
+        {
+          path: 'experience',
+          name: 'admin-experience',
+          component: () => import('@/views/admin/ExperienceManagementView.vue'),
+        },
+        {
+          path: 'profile',
+          name: 'admin-profile',
+          component: () => import('@/views/admin/AdminProfileView.vue'),
+        },
       ],
     },
     {

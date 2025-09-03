@@ -3,7 +3,7 @@
     <template v-if="loading">
       <SkeletonProfile />
     </template>
-    <template v-else>
+    <template v-else-if="profile">
       <div
         class="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12 text-center md:text-left"
       >
@@ -64,6 +64,11 @@
         </p>
       </div>
     </template>
+    <template v-else>
+      <p class="text-center text-gray-500 dark:text-gray-400">
+        Perfil no encontrado.
+      </p>
+    </template>
 
     <div class="mt-12 text-center">
       <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4">Tecnologías</h2>
@@ -76,7 +81,7 @@
           ></div>
         </div>
       </template>
-      <template v-else-if="techs.length">
+      <template v-else-if="techs && techs.length">
         <div class="flex flex-wrap justify-center gap-4 text-sm">
           <UiBadge
             v-for="techData in techs"
@@ -101,7 +106,7 @@
       <template v-if="loading">
         <SkeletonExperience />
       </template>
-      <template v-else-if="experience.length">
+      <template v-else-if="experience && experience.length">
         <div class="space-y-8">
           <div
             v-for="job in experience"
@@ -129,23 +134,24 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { techService } from '@/services/techService.js'
-import { profileService } from '@/services/profileService.js'
-import { experienceService } from '@/services/experienceService.js'
+import { profileService } from '@/services/profileService'
+import { experienceService } from '@/services/experienceService'
 import { getTechColor } from '@/utils/badgeStyles'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import UiDivider from '@/components/UiDivider.vue'
 import SkeletonExperience from '@/components/ui/skeletons/SkeletonExperience.vue'
 import SkeletonProfile from '@/components/ui/skeletons/SkeletonProfile.vue'
+import type { Tables } from '@/types/supabase'
 
-const loading = ref(true) // Nuevo estado reactivo para la carga
-const profile = ref({})
-const techs = ref([])
-const experience = ref([])
+const loading = ref(true)
+const profile = ref<Tables<'user_profiles'> | null>(null)
+const techs = ref<Tables<'techs'>[] | null>(null)
+const experience = ref<Tables<'work_experience'>[] | null>(null)
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string | null): string => {
   if (!dateString) return ''
   const date = new Date(dateString)
-  const options = { year: 'numeric', month: 'long' }
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' }
   return date.toLocaleDateString('es-ES', options)
 }
 
@@ -154,20 +160,21 @@ onMounted(async () => {
     const adminUserId = import.meta.env.VITE_ADMIN_UUID
 
     const [fetchedProfile, fetchedTechs, fetchedExperience] = await Promise.all([
-      profileService.getAdminProfile(adminUserId),
+      profileService.getProfileByUserId(adminUserId),
       techService.getAllTechs(),
       experienceService.getAllExperience(),
     ])
 
-    profile.value = fetchedProfile || {}
-    techs.value = fetchedTechs || []
-    experience.value = fetchedExperience || []
-
-    console.log(profile.value)
+    profile.value = fetchedProfile
+    techs.value = fetchedTechs
+    experience.value = fetchedExperience
   } catch (err) {
     console.error('Error al cargar datos de la vista "Sobre mí":', err)
+    profile.value = null
+    techs.value = null
+    experience.value = null
   } finally {
-    loading.value = false // Detiene el estado de carga al finalizar la operación
+    loading.value = false
   }
 })
 </script>

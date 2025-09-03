@@ -19,7 +19,7 @@
     </div>
 
     <div
-      v-else-if="projects.length === 0"
+      v-else-if="projects && projects.length === 0"
       class="flex flex-col items-center text-center py-20 text-gray-500 dark:text-gray-400"
     >
       <font-awesome-icon :icon="faFaceFrown" class="w-14 h-14 mb-4 text-current" />
@@ -40,7 +40,7 @@
         <UiLoader />
       </div>
 
-      <p v-if="!hasMoreProjects && projects.length > 0" class="text-center text-gray-500 mt-8">
+      <p v-if="!hasMoreProjects && projects && projects.length > 0" class="text-center text-gray-500 mt-8">
         No hay más proyectos para mostrar.
       </p>
     </div>
@@ -49,55 +49,50 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useUiStore } from '@/stores/uiStore'
-import { projectService } from '@/services/projectService.js'
+import { projectService } from '@/services/projectService'
 import UiAlert from '@/components/ui/UiAlert.vue'
 import ProjectCard from '@/components/project/ProjectCard.vue'
 import ProjectCardSkeleton from '@/components/ui/skeletons/ProjectCardSkeleton.vue'
 import InfiniteScrollSentinel from '@/components/common/InfiniteScrollSentinel.vue'
 import UiLoader from '@/components/ui/UiLoader.vue'
-// Archivo donde deseas probar la conexión
-import supabase from '@/lib/supabaseClient'
 import { faFaceFrown } from '@fortawesome/free-solid-svg-icons'
+import type { Tables } from '@/types/supabase' // <-- Importamos el tipo 'Tables'
 
-async function testSupabaseConnection() {
-  const { data, error } = await supabase.from('projects').select('*')
-
-  if (error) {
-    console.error('Error connecting to Supabase:', error)
-  } else {
-    console.log('Data from Supabase:', data)
-  }
-}
-
-testSupabaseConnection()
-
-const projects = ref([])
-const isLoadingInitial = ref(true) // Carga inicial
-const isLoadingMore = ref(false) // Carga de más elementos
-const error = ref(null)
+// Tipado de las referencias reactivas
+const projects = ref<Tables<'projects'>[] | null>([])
+const isLoadingInitial = ref(true)
+const isLoadingMore = ref(false)
+const error = ref<string | null>(null)
 const page = ref(1)
-const projectsPerPage = 6 // Define cuántos proyectos cargar por lote
+const projectsPerPage = 6
 const hasMoreProjects = ref(true)
 
 const fetchProjects = async (pageNumber = 1) => {
   error.value = null
+  const currentProjects = projects.value || [] // Para evitar `null` en `projects.value`
 
   if (pageNumber === 1) {
     isLoadingInitial.value = true
+    projects.value = null // Limpiar el estado de proyectos en la carga inicial
   } else {
     isLoadingMore.value = true
   }
 
   try {
-    const fetchedProjects = await projectService.getProjectsByPage(pageNumber, projectsPerPage)
+    const fetchedProjects = await projectService.getProjectsByPage(
+      pageNumber,
+      projectsPerPage
+    )
 
-    if (fetchedProjects.length === 0) {
+    if (fetchedProjects === null || fetchedProjects.length === 0) {
       hasMoreProjects.value = false
+      if (pageNumber === 1) {
+        projects.value = [] // Si no hay proyectos, inicializamos a un array vacío
+      }
     } else {
-      projects.value = projects.value.concat(fetchedProjects)
+      projects.value = [...currentProjects, ...fetchedProjects]
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error('Error fetching projects:', err)
     error.value = 'No se pudieron cargar los proyectos. Por favor, verifica tu conexión.'
   } finally {
@@ -112,7 +107,6 @@ const fetchProjects = async (pageNumber = 1) => {
 }
 
 const loadMoreProjects = async () => {
-  // No cargar más si ya se llegó al final o si ya hay una carga en progreso
   if (!hasMoreProjects.value || isLoadingMore.value) {
     return
   }

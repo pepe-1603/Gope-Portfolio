@@ -5,19 +5,22 @@ import {
   getCurrentUser,
   login as authServiceLogin,
   logout as authServiceLogout,
-} from '@/services/auhtService'
-import { profileService } from '@/services/profileService' // Importamos el servicio de perfiles
+} from '@/services/authService.ts'
+import { profileService } from '@/services/profileService'
 import { useToastStore } from '@/stores/toast'
+import type { User } from '@supabase/supabase-js'
+import type { Tables } from '@/types/supabase'
 
 export const useAuthStore = defineStore(
   'auth',
   () => {
-    const user = ref(null)
-    const profile = ref(null) // Nuevo estado para el perfil
-    const isAuthenticated = ref(false)
+    // Definimos explícitamente los tipos para los estados
+    const user = ref<User | null>(null)
+    const profile = ref<Tables<'user_profiles'> | null>(null)
+    const isAuthenticated = ref<boolean>(false)
     const toastStore = useToastStore()
 
-    const setUserAndProfile = (newUser, newProfile = null) => {
+    const setUserAndProfile = (newUser: User | null, newProfile: Tables<'user_profiles'> | null = null) => {
       user.value = newUser
       profile.value = newProfile
       isAuthenticated.value = !!newUser
@@ -27,31 +30,40 @@ export const useAuthStore = defineStore(
       console.log('🔄 Verificando autenticación...')
       const currentUser = await getCurrentUser()
       if (currentUser) {
-        // Obtenemos el perfil si el usuario existe
         console.log('✅ Autenticación verificada. El usuario está logueado.')
-        const userProfile = await profileService.getAdminProfile(currentUser.id)
-        setUserAndProfile(currentUser, userProfile)
+        try {
+          // El método getAdminProfile en profileService.js debe ser tipado para esto
+          const userProfile = await profileService.getProfileByUserId(currentUser.id)
+          setUserAndProfile(currentUser, userProfile)
+        } catch (error) {
+          console.error('Error al obtener el perfil del usuario:', error)
+          setUserAndProfile(currentUser, null)
+        }
       } else {
         console.log('❌ No se encontró token. El usuario no está logueado.')
-
         setUserAndProfile(null, null)
       }
     }
 
-    // Nuevo método para obtener solo el perfil
     const fetchProfile = async () => {
       if (user.value) {
-        const userProfile = await profileService.getAdminProfile(user.value.id)
-        profile.value = userProfile
+        try {
+          const userProfile = await profileService.getProfileByUserId(user.value.id)
+          profile.value = userProfile
+        } catch (error) {
+          console.error('Error al recargar el perfil:', error)
+          profile.value = null
+        }
       }
     }
 
-    const login = async (credentials) => {
+    const login = async (credentials: any) => {
       try {
         const loggedInUser = await authServiceLogin(credentials)
-        // Obtenemos el perfil inmediatamente después del login
-        const userProfile = await profileService.getAdminProfile(loggedInUser.id)
-        setUserAndProfile(loggedInUser, userProfile)
+        if (loggedInUser) {
+          const userProfile = await profileService.getProfileByUserId(loggedInUser.id)
+          setUserAndProfile(loggedInUser, userProfile)
+        }
 
         toastStore.addToast({
           message: '¡Bienvenido! Has iniciado sesión.',
@@ -71,7 +83,7 @@ export const useAuthStore = defineStore(
     const logout = async () => {
       try {
         await authServiceLogout()
-        setUserAndProfile(null, null) // Limpiamos tanto el usuario como el perfil
+        setUserAndProfile(null, null)
         toastStore.addToast({
           message: 'Sesión cerrada correctamente.',
           type: 'success',
@@ -87,11 +99,11 @@ export const useAuthStore = defineStore(
 
     return {
       user,
-      profile, // Exponemos el estado del perfil
+      profile,
       isAuthenticated,
       setUserAndProfile,
       checkAuth,
-      fetchProfile, // Exponemos el nuevo método
+      fetchProfile,
       login,
       logout,
     }

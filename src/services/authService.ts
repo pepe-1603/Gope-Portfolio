@@ -1,7 +1,9 @@
 // src/services/authService.ts
-import supabase from '@/lib/supabaseClient'
 
-export const login = async (credentials) => {
+import supabase from '@/lib/supabaseClient'
+import type { AuthTokenResponsePassword, User } from '@supabase/supabase-js'
+
+export const login = async (credentials: AuthTokenResponsePassword) => {
   const { data, error } = await supabase.auth.signInWithPassword(credentials)
 
   if (error) {
@@ -11,7 +13,7 @@ export const login = async (credentials) => {
   return data.user
 }
 
-export const logout = async () => {
+export const logout = async (): Promise<void> => {
   const { error } = await supabase.auth.signOut()
 
   if (error) {
@@ -19,7 +21,7 @@ export const logout = async () => {
   }
 }
 
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (): Promise<User | null> => {
   const {
     data: { user },
   } = await supabase.auth.getUser()

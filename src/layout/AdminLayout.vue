@@ -6,7 +6,7 @@
         <ul class="space-y-2">
           <li>
             <router-link
-              to=""
+              to="/admin"
               class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
               active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
             >
@@ -34,12 +34,37 @@
               <span>Tecnologías</span>
             </router-link>
           </li>
+          <li>
+            <router-link
+              to="/admin/experience"
+              class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-briefcase" />
+              <span>Experiencia</span>
+            </router-link>
+          </li>
+          <li class="border-t border-gray-200 dark:border-gray-700 my-4 pt-4"></li>
+          <li>
+            <router-link
+              to="/admin/profile"
+              class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-user-cog" />
+              <span>Mi Perfil</span>
+            </router-link>
+          </li>
         </ul>
       </nav>
-      <UiButton @click="handleLogout" intent="danger" class="w-full">
+      <button
+        type="button"
+        @click="handleLogout"
+        class="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
+      >
         <font-awesome-icon icon="fa-solid fa-right-from-bracket" class="mr-2" />
         Cerrar Sesión
-      </UiButton>
+      </button>
     </aside>
 
     <main class="flex-grow p-6 overflow-y-auto">
@@ -57,17 +82,39 @@ import {
   faListCheck,
   faMicrochip,
   faRightFromBracket,
+  faUserCog,
+  faBriefcase, // Importamos el ícono de experiencia
 } from '@fortawesome/free-solid-svg-icons'
-import { useAuthStore } from '@/stores/authStore' // Importamos el store de auth
-import UiButton from '@/components/ui/UiButton.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useGlobalModal } from '@/composables/useGlobalModal'
+import ConfirmLogoutModal from '@/components/ui/modals/ConfirmLogoutModal.vue'
 
-library.add(faGaugeHigh, faListCheck, faMicrochip, faRightFromBracket)
+library.add(
+  faGaugeHigh,
+  faListCheck,
+  faMicrochip,
+  faRightFromBracket,
+  faUserCog,
+  faBriefcase,
+)
 
 const router = useRouter()
 const authStore = useAuthStore()
+const modal = useGlobalModal()
 
 const handleLogout = async () => {
-  await authStore.logout()
-  router.push({ name: 'home' }) // Redirigimos a una ruta pública, ya que la de login ya no existe
+  const result = await modal.showModal(
+    ConfirmLogoutModal,
+    {},
+    {
+      title: 'Confirmar Cierre de Sesión',
+      closeOnClickOutside: false,
+    }
+  )
+
+  if (result?.action === 'confirm') {
+    await authStore.logout()
+    router.push({ name: 'home' })
+  }
 }
 </script>

@@ -1,5 +1,6 @@
 <template>
   <span :class="badgeClasses">
+    <div v-if="pointer && size=='xs'" class="rounded-full p-0.5 border-none shadow-none outline-none relative -top-1 -left-0.5 bg-current opacity-75"></div>
     <div v-if="icon" :class="iconContainerClasses">
       <img v-if="typeof icon === 'string'" :src="icon" alt="" class="w-7 h-7 object-contain" />
       <component v-else :is="icon" :class="iconSizeClasses" />
@@ -17,6 +18,7 @@ interface UiBadgeProps {
   text: string
   color?: BadgeVariants['color']
   size?: BadgeVariants['size']
+  pointer?: boolean
   // La prop 'icon' ahora acepta un string (URL) o un componente de Vue
   icon?: string | object | Function | null
 }
@@ -24,6 +26,7 @@ interface UiBadgeProps {
 const props = withDefaults(defineProps<UiBadgeProps>(), {
   color: 'gray',
   size: 'sm',
+  pointer: false,
   icon: null,
 })
 
