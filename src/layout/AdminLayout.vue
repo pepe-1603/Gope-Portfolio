@@ -107,7 +107,6 @@ const handleLogout = async () => {
     ConfirmLogoutModal,
     {},
     {
-      title: 'Confirmar Cierre de Sesión',
       closeOnClickOutside: false,
     }
   )

@@ -3,7 +3,9 @@
   <div class="p-4">
     <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Confirmar Eliminación</h2>
     <p class="text-gray-600 dark:text-gray-400 mb-6">
-      ¿Estás seguro de que quieres eliminar el proyecto <strong class="text-blue-500">{{ title }}</strong > con el ID <strong class="text-gray-600 dark:text-gray-700">**{{ itemId }}**</strong>? Esta acción no se puede deshacer.
+      ¿Estás seguro de que quieres eliminar <strong class="text-blue-500">{{ title }}</strong> con
+      el ID <strong class="text-gray-600 dark:text-gray-700">**{{ itemId }}**</strong>? Esta acción
+      no se puede deshacer.
     </p>
 
     <div class="flex justify-end gap-x-2">
@@ -27,14 +29,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import type { ModalResult } from '@/types/modal.d.ts'; // Asegúrate de que esta ruta sea correcta
-import UiSpinner from '../UiSpinner.vue';
+import { defineComponent, ref } from 'vue'
+import type { ModalResult } from '@/types/modal.d.ts' // Asegúrate de que esta ruta sea correcta
+import UiSpinner from '../UiSpinner.vue'
 
 export default defineComponent({
   name: 'ConfirmDeleteModal',
   // Props inyectadas por useGlobalModal
-  components: {  UiSpinner },
+  components: { UiSpinner },
   props: {
     modalId: { type: Number, required: true },
     __onConfirm: { type: Function, required: true },
@@ -45,31 +47,29 @@ export default defineComponent({
     title: { type: [String] },
   },
   setup(props) {
-    const isDeleting = ref(false);
-
-
+    const isDeleting = ref(false)
 
     const handleConfirm = async () => {
-      isDeleting.value = true;
+      isDeleting.value = true
       try {
         // Ejecutamos la lógica de confirmación del modal y esperamos a que termine.
         // La vista padre (ProjectManagementView) será la que maneje la llamada al servicio.
-        props.__onConfirm({ action: 'confirm', payload: null } as ModalResult);
+        props.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
       } finally {
-        isDeleting.value = false;
+        isDeleting.value = false
         // El modal se cerrará automáticamente, por lo que no necesitamos llamar a onClose aquí.
       }
-    };
+    }
 
     const handleCancel = () => {
-      props.__onCancel({ action: 'cancel', payload: null } as ModalResult);
-    };
+      props.__onCancel({ action: 'cancel', payload: null } as ModalResult)
+    }
 
     return {
       isDeleting,
       handleConfirm,
       handleCancel,
-    };
+    }
   },
-});
+})
 </script>

@@ -1,5 +1,5 @@
 
-<script setup lang="ts" name="=PreviewComnponets">
+<script setup lang="ts">
 // pagina depruebna par acompeontes test
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
 import UiAlert from '@/components/ui/UiAlert.vue'
@@ -24,7 +24,9 @@ import {
 import { ref } from 'vue'
 
 import { useToast } from '@/composables/useToast'
-import { useModal } from '@/composables/useModal'
+import SkeletonListProjects from '@/components/ui/skeletons/SkeletonListProjects.vue'
+import SkeletonListTechs from '@/components/ui/skeletons/SkeletonListTechs.vue'
+import SkeletonListExperience from '@/components/ui/skeletons/SkeletonListExperience.vue'
 
 const name = ref('')
 const email = ref('')
@@ -37,7 +39,6 @@ const notificationsEnabled = ref(false) // Esta variable se controlará internam
 
 // 1. Importa y usa el composable
 const toast = useToast()
-const modal = useModal()
 
 toast.warning('Este es un warning.')
 toast.info('Este Es un Toast informativo.')
@@ -55,24 +56,6 @@ const handleLoginError = () => {
   toast.error('Credenciales incorrectas. Inténtalo de nuevo.')
 }
 
-const openDeleteConfirmation = (id: number) => {
-  // 1. Llama a `open()` con el nombre del modal
-  // 2. Pasa los datos como un objeto de props
-  // 3. Opcionalmente, deshabilita el cierre al hacer clic fuera por seguridad
-  modal.open('ConfirmDeleteModal', { itemId: id }, false)
-}
-
-const openLoginModal = () => {
-  // Simplemente llama a `open()` con el nombre de tu modal.
-  modal.open('LoginModal')
-}
-
-const openResetPasswordModal = () => {
-  // 1. Llama a `open()` con el nombre del modal
-  // 2. Pasa el email como prop
-  // 3. Deshabilita el cierre al hacer clic fuera
-  modal.open('ConfirmResetPasswordModal2', { email: email.value }, false)
-}
 
 const form = ref({
   bio: '',
@@ -98,110 +81,24 @@ const settings = ref({
   betaFeatures: false,
 })
 
-/**
- *
- * <template>
-  <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-6">
-    <div class="text-center">
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Acceso de Administrador</h2>
-    </div>
-    <form @submit.prevent="handleLogin" class="space-y-4">
-      <UiFormField
-        id="email"
-        label="Email"
-        type="email"
-        v-model="email"
-        placeholder="email@ejemplo.com"
-        :errorMessage="errors.email"
-      />
-      <UiFormField
-        id="password"
-        label="Contraseña"
-        type="password"
-        v-model="password"
-        placeholder="••••••••"
-        :errorMessage="errors.password"
-      />
-      <UiButton
-        type="submit"
-        :disabled="loading"
-        class="w-full"
-        :variant="loading ? 'disabled' : 'default'"
-      >
-        <UiSpinner v-if="loading" />
-        <span v-else>Iniciar Sesión</span>
-      </UiButton>
-    </form>
-  </div>
-</template>
-
-<script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore'
-import { useModal } from '@/composables/useModal'
-import UiButton from '@/components/ui/UiButton.vue'
-import UiFormField from '@/components/ui/UiFormField.vue'
-import UiSpinner from '@/components/ui/UiSpinner.vue'
-
-export default defineComponent({
-  name: 'LoginModal',
-  components: {
-    UiButton,
-    UiFormField,
-    UiSpinner
-  },
-  setup() {
-    const router = useRouter()
-    const authStore = useAuthStore()
-    const { closeModal } = useModal()
-
-    const email = ref('')
-    const password = ref('')
-    const loading = ref(false)
-    const errors = ref({
-      email: '',
-      password: '',
-    })
-
-    const validate = () => {
-      errors.value.email = email.value ? '' : 'El email es requerido.'
-      errors.value.password = password.value ? '' : 'La contraseña es requerida.'
-      return !errors.value.email && !errors.value.password
-    }
-
-    const handleLogin = async () => {
-      if (!validate()) {
-        return
-      }
-
-      loading.value = true
-      try {
-        await authStore.login({ email: email.value, password: password.value })
-        closeModal()
-      } catch (error) {
-        // The store handles the toast for errors, so we don't need it here.
-      } finally {
-        loading.value = false
-      }
-    }
-
-    return {
-      email,
-      password,
-      loading,
-      errors,
-      handleLogin
-    }
-  }
-})
-</script>
- */
 
 </script>
 
 <template>
   <div class="about">
+
+    <div class="container mx-auto p-6">
+      <h1>Seccion de Componentes Genericos y Skeletons</h1>
+      <UiDivider :icon="TicketIcon" color="green" label="List Projects"/>
+      <SkeletonListProjects/>
+      <UiDivider :icon="TagIcon" color="blue" label="List Techs"/>
+      <SkeletonListTechs/>
+      <UiDivider :icon="PhoneIcon" color="purple" label="List Experience"/>
+      <SkeletonListExperience/>
+
+    </div>
+
+
     <div :class="{ 'dark bg-gray-900 text-white': isDarkMode }" class="p-8 space-y-8 min-h-screen">
       <ThemeSwitch />
 
@@ -425,12 +322,12 @@ export default defineComponent({
             <button @click="handleLoginError" class="bg-red-500 text-white p-3 rounded-md">
               Login Fallido
             </button>
-            <button class="bg-indigo-500 text-white p-3 rounded-md" @click="openLoginModal">
+            <button class="bg-indigo-500 text-white p-3 rounded-md" >
               Abrir Login
             </button>
 
             <button
-              @click="openDeleteConfirmation(42)"
+
               class="px-4 py-2 rounded-md bg-orange-500 text-white"
             >
               Eliminar Item #42
@@ -445,7 +342,7 @@ export default defineComponent({
               placeholder="Tu correo electrónico"
               class="w-full p-2 mb-4 border rounded"
             />
-            <button @click="openResetPasswordModal" class="bg-blue-500 text-white p-3 rounded-md">
+            <button  class="bg-blue-500 text-white p-3 rounded-md">
               Restablecer Contraseña
             </button>
           </div>

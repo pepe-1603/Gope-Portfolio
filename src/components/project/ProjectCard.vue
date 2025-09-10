@@ -4,7 +4,7 @@
       <img
         :src="props.project.image_url"
         :alt="`Imagen del proyecto ${project.title}`"
-        class="w-full h-48 object-cover rounded-t-lg"
+        class="w-full min-h-36 md:h-48 lg:h-52 object-cover rounded-t-lg"
       />
       <div class="p-4">
         <h2 class="text-xl font-semibold mb-2">{{ project.title }}</h2>

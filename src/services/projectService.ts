@@ -2,7 +2,7 @@
 
 import supabase from '@/lib/supabaseClient'
 import type { Tables } from '@/types/supabase'
-import type { ProjectWithTechs } from '@/types/project';
+import type { ProjectWithTechs } from '@/types/project'
 
 const PROJECTS_TABLE = 'projects'
 
@@ -29,7 +29,7 @@ export const projectService = {
     }
   },
 
-   /**
+  /**
    * Obtiene una lista paginada de proyectos.
    * @param page El número de página (empieza en 1).
    * @param itemsPerPage La cantidad de elementos por página.
@@ -46,6 +46,7 @@ export const projectService = {
       const { data, error } = await supabase
         .from(PROJECTS_TABLE)
         .select('*')
+        .eq('is_published', true)
         .order('created_at', { ascending: false }) // Opcional: ordenar por fecha de creación
         .range(start, end)
 
@@ -61,37 +62,58 @@ export const projectService = {
   },
 
   /**
-   * Obtiene un proyecto y sus tecnologías asociadas por su slug.
-   * Utiliza una función RPC (Remote Procedure Call) de Supabase.
+   * Obtiene un proyecto por su ID, con sus tecnologías asociadas.
+   * @param id El ID del proyecto.
+   * @returns {Promise<ProjectWithTechs | null>} Una promesa que resuelve con un objeto de proyecto, incluyendo sus tecnologías, o null.
+   */
+  getProjectById: async (id: string): Promise<ProjectWithTechs | null> => {
+    try {
+      const { data, error } = await supabase
+        .from(PROJECTS_TABLE)
+        .select('*, project_techs(techs(*))')
+        .eq('id', id)
+        .single()
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          console.warn(`Project with ID ${id} not found.`)
+          return null
+        }
+        console.error('Error fetching project by ID:', error.message)
+        throw error
+      }
+      return data as ProjectWithTechs
+    } catch (error) {
+      console.error('Error in getProjectById:', error)
+      throw error
+    }
+  },
+
+  /**
    * Obtiene un proyecto por su slug, con sus tecnologías asociadas.
    * @param slug El slug del proyecto.
-   * @returns {Promise<any | null>} Una promesa que resuelve con un objeto de proyecto, incluyendo sus tecnologías, o null.
-   * @note El tipo de retorno es 'any' ya que las funciones RPC tienen una estructura de datos personalizada.
+   * @returns {Promise<ProjectWithTechs | null>} Una promesa que resuelve con un objeto de proyecto, incluyendo sus tecnologías, o null.
    */
   getProjectBySlug: async (slug: string): Promise<ProjectWithTechs | null> => {
     try {
-      const { data, error } = await supabase.rpc('get_project_with_techs_by_slug_v2', {
-        p_slug: slug,
-      });
+      const { data, error } = await supabase
+        .from(PROJECTS_TABLE)
+        .select('*, project_techs(techs(*))')
+        .eq('slug', slug)
+        .single()
 
-      console.log('Data RPC in Services: ', data)
       if (error) {
-        console.error('Error fetching project by slug:', error.message);
-        throw error;
+        if (error.code === 'PGRST116') {
+          console.warn(`Project with slug '${slug}' not found.`)
+          return null
+        }
+        console.error('Error fetching project by slug:', error.message)
+        throw error
       }
-      // La RPC devuelve un array. Si el array tiene un elemento, lo devolvemos.
-      if (data) {
-        // Asegúrate de que el objeto devuelto coincida con la interfaz
-        return data as ProjectWithTechs;
-      }
-
-      // Si no hay datos, retornamos null
-      return null;
-
-
+      return data as ProjectWithTechs
     } catch (error) {
-      console.error('Error en getProjectBySlug:', error);
-      throw error;
+      console.error('Error in getProjectBySlug:', error)
+      throw error
     }
   },
 
@@ -100,15 +122,13 @@ export const projectService = {
    * @param projectData Los datos del nuevo proyecto.
    * @returns {Promise<Tables<'projects'>>} Una promesa que resuelve con el objeto del proyecto creado.
    */
-  createProject: async (
-    projectData: Tables<'projects'>['Insert'],
-  ): Promise<Tables<'projects'>> => {
+  createProject: async (projectData: Tables<'projects'>['Insert']): Promise<Tables<'projects'>> => {
     try {
       const { data, error } = await supabase
         .from(PROJECTS_TABLE)
         .insert(projectData)
         .select()
-        .single() // Usamos .single() para obtener directamente el objeto
+        .single()
       if (error) {
         console.error('Error creating project:', error.message)
         throw error
@@ -136,14 +156,115 @@ export const projectService = {
         .update(projectData)
         .eq('id', id)
         .select()
-        .single()
+        .single() // <--- Usa .single() para obtener un solo resultado
+
+      console.log('data service:', data)
+
       if (error) {
-        console.error('Error updating project:', error.message)
+        console.error('Error updating project:', error.message, error)
         throw error
       }
+
+      // Si no se encontró el proyecto (data es null)
+      if (!data) {
+        const notFoundError = new Error('No se encontró el proyecto para actualizar.') as any
+        notFoundError.code = 'PGRST116'
+        throw notFoundError
+      }
+      console.log('Proyecto actualizado con éxito:', data)
       return data
     } catch (error) {
       console.error('Error in updateProject:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Actualiza las tecnologías asociadas a un proyecto.
+   * @param projectId El ID del proyecto.
+   * @param techIds Los IDs de las tecnologías seleccionadas.
+   * @returns {Promise<void>}
+   */
+  updateProjectTechs: async (projectId: string, techIds: string[]): Promise<void> => {
+    try {
+      console.log('Iniciando actualización de tecnologías para el proyecto:', projectId)
+      console.log('IDs de tecnologías a insertar:', techIds)
+      const { error: deleteError } = await supabase
+        .from('project_techs')
+        .delete()
+        .eq('project_id', projectId)
+
+      if (deleteError) {
+        console.error('Error al eliminar tecnologías de proyecto:', deleteError.message)
+        throw deleteError
+      }
+      console.log('Tecnologías existentes eliminadas con éxito.')
+
+      if (techIds.length > 0) {
+        const inserts = techIds.map((techId) => ({
+          project_id: projectId,
+          tech_id: techId,
+        }))
+        console.log('Registros a insertar:', inserts)
+        const { error: insertError } = await supabase.from('project_techs').insert(inserts)
+
+        if (insertError) {
+          console.error('Error al insertar nuevas tecnologías:', insertError.message)
+          throw insertError
+        }
+        console.log('Nuevas tecnologías insertadas con éxito.')
+      }
+    } catch (error) {
+      console.error('Error en updateProjectTechs:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Crea un nuevo proyecto y sus tecnologías asociadas.
+   * @param projectData Los datos del nuevo proyecto.
+   * @param techIds Los IDs de las tecnologías a asociar.
+   * @returns {Promise<Tables<'projects'>>} El proyecto creado.
+   */
+  createProjectAndTechs: async (
+    projectData: Tables<'projects'>['Insert'],
+    techIds: string[],
+  ): Promise<Tables<'projects'>> => {
+    try {
+      const newProject = await projectService.createProject(projectData)
+      if (techIds && techIds.length > 0) {
+        await projectService.updateProjectTechs(newProject.id, techIds)
+      }
+      return newProject
+    } catch (error) {
+      console.error('Error en createProjectAndTechs:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Actualiza un proyecto y sus tecnologías asociadas.
+   * @param projectId El ID del proyecto a actualizar.
+   * @param projectData Los datos del proyecto.
+   * @param techIds Los IDs de las tecnologías a asociar.
+   * @returns {Promise<Tables<'projects'>>} El proyecto actualizado.
+   */
+  updateProjectAndTechs: async (
+    projectId: string,
+    projectData: Tables<'projects'>['Update'],
+    techIds: string[],
+  ): Promise<Tables<'projects'>> => {
+    try {
+      if (!projectId) {
+        console.error('El ID del proyecto no es válido.')
+        throw new Error('El ID del proyecto no es válido.')
+      }
+
+      await projectService.updateProjectTechs(projectId, techIds)
+      const updatedProject = await projectService.updateProject(projectId, projectData)
+      return updatedProject
+    } catch (error) {
+      console.error('Error en updateProjectAndTechs:', error)
       throw error
     }
   },
@@ -156,14 +277,11 @@ export const projectService = {
   deleteProject: async (id: string): Promise<void> => {
     try {
       const { error, status } = await supabase.from(PROJECTS_TABLE).delete().eq('id', id)
-
-      setTimeout(()=>{
-console.log(status, 'proyecto eliminado con id : ', id);
-      }, 5000);
       if (error) {
         console.error('Error deleting project:', error.message)
         throw error
       }
+      console.log(status, 'proyecto eliminado con id : ', id)
     } catch (error) {
       console.error('Error in deleteProject:', error)
       throw error

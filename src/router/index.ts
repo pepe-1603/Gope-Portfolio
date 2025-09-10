@@ -7,7 +7,6 @@ import AuthLayout from '@/layout/AuthLayout.vue'
 import AuthHomeView from '@/views/auth/AuthHomeView.vue'
 import { handleAuthGuards } from '@/composables/useRouterAuth'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -19,6 +18,11 @@ const router = createRouter({
           path: '',
           name: 'home',
           component: HomeView,
+        },
+        {
+          path: '/test',
+          name: 'test-preview',
+          component: () => import('@/views/PreviewComponents.vue'),
         },
         {
           path: '/about',
@@ -33,7 +37,7 @@ const router = createRouter({
         {
           path: '/proyectos/:slug',
           name: 'project-detail',
-          component: () => import('@/views/project/Slug.vue'),
+          component: () => import('@/views/project/ProjectSlug.vue'),
         },
       ],
     },
@@ -53,11 +57,24 @@ const router = createRouter({
           name: 'admin-projects',
           component: () => import('@/views/admin/ProjectManagementView.vue'),
         },
+        {
+          path: 'projects/:id/preview',
+          name: 'admin-project-preview',
+          component: () => import('@/views/admin/ProjectPreviewView.vue'),
+          props: true, // Esto permite que el `id` se pase como prop al componente
+        },
         // ✅ AÑADIDO: Ruta anidada para tecnologías
         {
           path: 'technologies',
           name: 'admin-techs',
           component: () => import('@/views/admin/TechManagementView.vue'),
+        },
+        // ✅ NUEVA RUTA PARA LA VISTA DE TECNOLOGÍA
+        {
+          path: 'technologies/:id/preview',
+          name: 'admin-tech-preview',
+          component: () => import('@/views/admin/TechPreviewView.vue'),
+          props: true,
         },
         {
           // ✅ NUEVA RUTA: Ruta para la configuración de admin
@@ -96,8 +113,8 @@ const router = createRouter({
     {
       path: '/:catchAll(.*)',
       name: 'NotFound',
-      component: () => import('@/views/NotFoundView.vue') // O el nombre de tu vista 404
-    }
+      component: () => import('@/views/NotFoundView.vue'), // O el nombre de tu vista 404
+    },
   ],
 })
 

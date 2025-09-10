@@ -10,6 +10,7 @@
       :disabled="disabled"
       @input="updateValue"
       :class="styles"
+      :rows="computedRows"
     />
     <p v-if="errorMessage" class="text-xs text-red-500">
       {{ errorMessage }}
@@ -30,10 +31,14 @@ const props = withDefaults(
     disabled?: boolean
     errorMessage?: string
     intent?: FormFieldVariants['intent']
+    minRows?: number
+    maxRows?: number
   }>(),
   {
     disabled: false,
     intent: 'default',
+    minRows: 4,
+    maxRows: 12,
   },
 )
 
@@ -44,9 +49,23 @@ const updateValue = (event: Event) => {
   emit('update:modelValue', target.value)
 }
 
+const computedRows = computed(() => {
+  const lineCount = props.modelValue.split('\n').length
+  return Math.min(Math.max(lineCount, props.minRows), props.maxRows)
+})
+
 const styles = computed(() => {
-  return formFieldStyles({
+  const baseStyles = formFieldStyles({
     intent: props.disabled ? 'disabled' : props.errorMessage ? 'error' : props.intent,
   })
+
+  // Evita el cambio manual de tamaño por el usuario
+  // Y si llega al máximo, habilita el scroll
+  const dynamicStyles = [
+    'resize-none',
+    props.modelValue.split('\n').length > props.maxRows ? 'overflow-y-auto' : 'overflow-hidden',
+  ]
+
+  return [...baseStyles.split(' '), ...dynamicStyles].join(' ')
 })
 </script>

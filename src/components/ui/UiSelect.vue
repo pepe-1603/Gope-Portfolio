@@ -4,6 +4,12 @@
       {{ label }}
     </label>
     <div class="relative">
+      <div
+        v-if="$slots.icon"
+        class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+      >
+        <slot name="icon" />
+      </div>
       <select
         :id="id"
         :value="modelValue"
@@ -12,7 +18,9 @@
         :class="selectStyles"
       >
         <option v-if="placeholder" disabled value="">{{ placeholder }}</option>
-        <slot />
+        <option v-for="option in options" :key="option.value" :value="option.value">
+          {{ option.label }}
+        </option>
       </select>
       <div
         class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-700 dark:text-gray-300"
@@ -46,15 +54,20 @@ const props = withDefaults(
   defineProps<{
     label?: string
     id: string
-    modelValue: string | number
+    modelValue: string | null // Ajustamos para aceptar null
     placeholder?: string
     disabled?: boolean
     errorMessage?: string
     intent?: FormFieldVariants['intent']
+    // Nueva prop para las opciones
+    options: { value: string | null; label: string }[]
   }>(),
   {
     disabled: false,
     intent: 'default',
+    modelValue: null,
+    placeholder: 'Selecciona una opción',
+    options: () => [],
   },
 )
 
@@ -62,14 +75,15 @@ const emit = defineEmits(['update:modelValue'])
 
 const updateValue = (event: Event) => {
   const target = event.target as HTMLSelectElement
-  emit('update:modelValue', target.value)
+  emit('update:modelValue', target.value === '' ? null : target.value)
 }
 
 const selectStyles = computed(() => {
+  const iconPadding = props.options.some((option) => option.label.includes('')) ? 'pl-10' : 'pl-4'
   return (
     formFieldStyles({
       intent: props.disabled ? 'disabled' : props.errorMessage ? 'error' : props.intent,
-    }) + ' appearance-none pr-10'
+    }) + ` appearance-none pr-10 ${iconPadding}`
   )
 })
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <div class="py-12">
+  <div class="px-6 py-12">
     <h1 class="text-3xl font-bold text-center mb-8 dark:text-white">Mis Proyectos</h1>
 
     <div v-if="isLoadingInitial" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -40,7 +40,10 @@
         <UiLoader />
       </div>
 
-      <p v-if="!hasMoreProjects && projects && projects.length > 0" class="text-center text-gray-500 mt-8">
+      <p
+        v-if="!hasMoreProjects && projects && projects.length > 0"
+        class="text-center text-gray-500 mt-8"
+      >
         No hay más proyectos para mostrar.
       </p>
     </div>
@@ -79,10 +82,7 @@ const fetchProjects = async (pageNumber = 1) => {
   }
 
   try {
-    const fetchedProjects = await projectService.getProjectsByPage(
-      pageNumber,
-      projectsPerPage
-    )
+    const fetchedProjects = await projectService.getProjectsByPage(pageNumber, projectsPerPage)
 
     if (fetchedProjects === null || fetchedProjects.length === 0) {
       hasMoreProjects.value = false
