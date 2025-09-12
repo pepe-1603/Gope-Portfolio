@@ -27,6 +27,7 @@ import { useToast } from '@/composables/useToast'
 import SkeletonListProjects from '@/components/ui/skeletons/SkeletonListProjects.vue'
 import SkeletonListTechs from '@/components/ui/skeletons/SkeletonListTechs.vue'
 import SkeletonListExperience from '@/components/ui/skeletons/SkeletonListExperience.vue'
+import StatusIndicator from '@/components/ui/StatusIndicator.vue'
 
 const name = ref('')
 const email = ref('')
@@ -86,6 +87,31 @@ const settings = ref({
 
 <template>
   <div class="about">
+
+<div class="p-8 space-y-4">
+
+
+  <div class="inline-flex items-center justify-center px-1 py-0.5 gap-1 ">
+    <div class="inline-flex items-center justify-center rounded-full bg-green-200/65 p-1">
+      <div class="size-2 rounded-full bg-green-500 animate-spin"></div>
+    </div>
+    <p class="text-gray-600 text-xs self-end">Conectado</p>
+  </div>
+
+    <br><br>
+<div class="p-8 space-y-4">
+ <StatusIndicator />
+
+    <StatusIndicator color="red" animated />
+
+    <StatusIndicator size="lg" text="En línea" />
+
+    <StatusIndicator color="blue" size="xl" text="Conectado" animated />
+    <StatusIndicator color="rose" size="xs" text="Desconectado" animated />
+    <StatusIndicator color="green"  text="Online" animated />
+  </div>
+
+  </div>
 
     <div class="container mx-auto p-6">
       <h1>Seccion de Componentes Genericos y Skeletons</h1>
