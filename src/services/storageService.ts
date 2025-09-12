@@ -5,9 +5,9 @@ import { v4 as uuidv4 } from 'uuid'
 
 // Definimos las variables de entorno.
 // Si no están definidas, usamos un valor por defecto para evitar errores.
-const PROJECT_BUCKET = import.meta.env.VITE_SUPABASE_PROJECTS_BUCKET || 'projects'
-const ICONS_BUCKET = import.meta.env.VITE_SUPABASE_ICONS_BUCKET || 'icons'
-const AVATARS_BUCKET = import.meta.env.VITE_SUPABASE_AVATARS_BUCKET || 'avatars'
+const PROJECT_BUCKET = import.meta.env.VITE_SUPABASE_PROJECTS_BUCKET
+const ICONS_BUCKET = import.meta.env.VITE_SUPABASE_ICONS_BUCKET
+const AVATARS_BUCKET = import.meta.env.VITE_SUPABASE_AVATARS_BUCKET
 
 /**
  * Servicio para la gestión de archivos en Supabase Storage.
@@ -25,6 +25,7 @@ export const StorageService = {
     file: File,
     folderPath: string = ''
   ): Promise<string> => {
+
     try {
       const path = folderPath ? `${folderPath}/${uuidv4()}-${file.name}` : `${uuidv4()}-${file.name}`
       const { data, error } = await supabase.storage.from(bucketName).upload(path, file)
@@ -78,21 +79,16 @@ export const StorageService = {
     }
   },
 
-  /**
+/**
    * Elimina un archivo de un bucket.
    * @param bucketName El nombre del bucket.
-   * @param fileUrl La URL del archivo a eliminar.
+   * @param fileName El nombre del archivo a eliminar.
    * @returns {Promise<void>}
    */
-  deleteFile: async (bucketName: string, fileUrl: string): Promise<void> => {
+  deleteFile: async (bucketName: string, fileName: string): Promise<void> => {
     try {
-      const path = fileUrl.split(`${bucketName}/`)[1]
-
-      if (!path) {
-        throw new Error('La URL del archivo no es válida o no contiene la ruta del archivo.')
-      }
-
-      const { error } = await supabase.storage.from(bucketName).remove([path])
+      // La API de Supabase .remove() requiere un array de rutas
+      const { error } = await supabase.storage.from(bucketName).remove([fileName])
       if (error) {
         console.error('Error al eliminar el archivo:', error.message)
         throw new Error(`No se pudo eliminar el archivo: ${error.message}`)
@@ -116,5 +112,5 @@ export const StorageService = {
   // ... puedes añadir más métodos para otros buckets (ej: avatares, PDFs, etc.)
 
   // Elimina una imagen de proyecto
-  deleteProjectImage: (fileUrl: string) => StorageService.deleteFile(PROJECT_BUCKET, fileUrl),
+  deleteProjectImage: (fileName: string) => StorageService.deleteFile(PROJECT_BUCKET, fileName),
 }

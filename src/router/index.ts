@@ -88,6 +88,11 @@ const router = createRouter({
           component: () => import('@/views/admin/ExperienceManagementView.vue'),
         },
         {
+          path: 'storage',
+          name: 'admin-storage',
+          component: () => import('@/views/admin/StorageManagementView.vue'),
+        },
+        {
           path: 'profile',
           name: 'admin-profile',
           component: () => import('@/views/admin/AdminProfileView.vue'),

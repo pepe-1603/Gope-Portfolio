@@ -44,6 +44,16 @@
               <span>Experiencia</span>
             </router-link>
           </li>
+          <li>
+            <router-link
+              to="/admin/storage"
+              class="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+              active-class="bg-indigo-50 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-200"
+            >
+              <font-awesome-icon icon="fa-solid fa-bucket" />
+              <span>Almacenamiento</span>
+            </router-link>
+          </li>
           <li class="border-t border-gray-200 dark:border-gray-700 my-4 pt-4"></li>
           <li>
             <router-link
@@ -82,6 +92,7 @@ import {
   faListCheck,
   faMicrochip,
   faRightFromBracket,
+  faBucket,
   faUserCog,
   faBriefcase, // Importamos el ícono de experiencia
 } from '@fortawesome/free-solid-svg-icons'
@@ -95,6 +106,7 @@ library.add(
   faMicrochip,
   faRightFromBracket,
   faUserCog,
+  faBucket,
   faBriefcase,
 )
 
