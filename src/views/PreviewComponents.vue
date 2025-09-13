@@ -150,6 +150,157 @@ const settings = ref({
         <UiButton @click="showNewDefaultToast">Mostrar Default</UiButton>
       </div>
 
+      <div class="p-8 space-y-6 max-w-2xl mx-auto">
+        <h1 class="text-3xl font-bold mb-4">Ejemplos de UiAlert</h1>
+        <UiAlert
+          intent="success"
+          title="Operación exitosa"
+          description="Los cambios se han guardado correctamente."
+          dismissible
+        />
+
+        <UiAlert
+          intent="warning"
+          title="Advertencia"
+          description="Esta es una pequeña descripcion"
+          dismissible
+        >
+          <p>
+            Tu espacio de almacenamiento se está agotando. Por favor,
+            <a href="#" class="underline font-bold">actualiza tu plan</a> para continuar recibiendo
+            copias de seguridad.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="info" title="Aviso de mantenimiento">
+          <p>
+            Se ha programado una sesión de mantenimiento del servidor para esta noche. El servicio
+            podría estar intermitente entre las 23:00 y las 01:00. Agradecemos su comprensión. Este
+            es un texto de prueba largo para ver si la alerta se ajusta correctamente y muestra el
+            scroll. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="warning" title="Advertencia de espacio en disco" dismissible>
+          <p>
+            Tu espacio de almacenamiento se está agotando. Elimina archivos innecesarios o considera
+            la posibilidad de actualizar tu plan para continuar recibiendo copias de seguridad de
+            forma automática. Este es un texto de prueba largo para ver si la alerta se ajusta
+            correctamente y muestra el scroll. Lorem ipsum dolor sit amet, consectetur adipiscing
+            elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+            minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore
+            eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa
+            qui officia deserunt mollit anim id est laborum.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="info" title="Nuevas políticas de privacidad">
+          <p>
+            Hemos actualizado nuestros términos y condiciones. Por favor, revisa los cambios para
+            continuar usando nuestros servicios.
+            <a href="#" class="underline font-semibold">Más información aquí.</a>
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="success" title="¡Tarea completada con éxito!" dismissible>
+          <p>
+            Todos los cambios se han guardado en el servidor. La sincronización se realizó
+            correctamente y no se encontraron errores en los archivos.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="warning" title="Advertencia de espacio en disco">
+          <p>
+            Tu espacio de almacenamiento se está agotando. Elimina archivos innecesarios o considera
+            la posibilidad de actualizar tu plan para continuar recibiendo copias de seguridad de
+            forma automática. Este es un texto de prueba largo para ver si la alerta se ajusta
+            correctamente y muestra el scroll. Lorem ipsum dolor sit amet, consectetur adipiscing
+            elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="info" title="Nuevas políticas de privacidad">
+          <p>
+            Hemos actualizado nuestros términos y condiciones. Por favor, revisa los cambios para
+            continuar usando nuestros servicios.
+            <a href="#" class="underline font-semibold">Más información aquí.</a>
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="danger" title="Error de conexión" dismissible>
+          <p>
+            No se pudo conectar con el servidor. Verifica tu conexión a internet e inténtalo de
+            nuevo.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="upcoming" title="Próximamente: Nuevas funciones">
+          <p>
+            ¡Prepárate para la próxima gran actualización! Hemos trabajado arduamente para mejorar
+            la velocidad y añadir nuevas herramientas de análisis de datos.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="new-feature" title="¡Nueva función de chat en vivo!" dismissible>
+          <p>
+            Ahora puedes comunicarte con nuestro equipo de soporte en tiempo real. Haz clic en el
+            ícono de chat en la esquina inferior derecha para empezar.
+          </p>
+        </UiAlert>
+
+        <UiAlert title="Aviso importante">
+          <p>Se ha programado una sesión de mantenimiento del servidor para esta noche.</p>
+        </UiAlert>
+      </div>
+
+      <div class="p-8 space-y-4 max-w-lg mx-auto">
+        <h1 class="text-3xl font-bold">Componente UiAlert</h1>
+
+        <UiAlert intent="success" title="¡Operación exitosa!">
+          <p>Los cambios se han guardado correctamente.</p>
+        </UiAlert>
+
+        <UiAlert intent="warning" title="Advertencia">
+          <p>Hay un problema que requiere tu atención.</p>
+        </UiAlert>
+
+        <UiAlert intent="success" title="¡Operación exitosa!" dismissible>
+          <p>Los cambios se han guardado correctamente.</p>
+        </UiAlert>
+
+        <UiAlert intent="danger" title="Error de conexión" dismissible>
+          <p>No se pudo establecer la conexión con el servidor.</p>
+        </UiAlert>
+
+        <UiAlert intent="info" title="Notificación">
+          <p>
+            Este es un mensaje de información.
+            <a href="#" class="font-bold underline">Haz clic aquí</a>
+            para más detalles.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="danger" title="Error Inesperado">
+          <p>
+            Este es un mensaje de error.
+            <a href="#" class="font-bold underline">Haz clic aquí</a>
+            para más detalles.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet consectetur adipisicing elit. Temporibus corrupti, culpa
+            saepe dolor soluta hic mollitia quod eos, labore et maxime fuga natus velit quibusdam
+            quo distinctio delectus debitis magni.
+          </p>
+        </UiAlert>
+
+        <UiAlert title="Aviso importante">
+          <p>Esta es una alerta genérica con el estilo por defecto.</p>
+        </UiAlert>
+      </div>
+
       <div class="flex md:flex-col space-y-4">
         <UiButton intent="primary">Botón Primario</UiButton>
         <UiButton intent="secondary">Botón Secundario</UiButton>
@@ -329,6 +480,37 @@ const settings = ref({
       </div>
       <div class="p-8 space-y-4 max-w-lg mx-auto">
         <h1 class="text-3xl font-bold">Componente UiAlert</h1>
+
+        <UiAlert
+          intent="success"
+          title="Operación exitosa"
+          description="Los cambios se han guardado correctamente."
+          dismissible
+        />
+
+        <UiAlert
+          intent="warning"
+          title="Advertencia"
+          description="Esta es una pequeña descripcion"
+          dismissible
+        >
+          <p>
+            Tu espacio de almacenamiento se está agotando. Por favor,
+            <a href="#" class="underline font-bold">actualiza tu plan</a> para continuar recibiendo
+            copias de seguridad.
+          </p>
+        </UiAlert>
+
+        <UiAlert intent="info" title="Aviso de mantenimiento">
+          <p>
+            Se ha programado una sesión de mantenimiento del servidor para esta noche. El servicio
+            podría estar intermitente entre las 23:00 y las 01:00. Agradecemos su comprensión. Este
+            es un texto de prueba largo para ver si la alerta se ajusta correctamente y muestra el
+            scroll. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
+            incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+            exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+        </UiAlert>
 
         <UiAlert
           intent="success"
