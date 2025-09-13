@@ -140,7 +140,7 @@ const settings = ref({
         <StatusIndicator color="green" text="Online" animated />
       </div>
 
-      <div class="p-4 divider-x divide-x-4 space-x-4">
+      <div class="p-4 divider-x space-x-4">
         <UiButton @click="showNewFeatureToast">Mostrar Novedad</UiButton>
         <UiButton @click="showUpComingToast">Mostrar UpComing</UiButton>
         <UiButton @click="showNewInfoToast">Mostrar Info</UiButton>
@@ -148,6 +148,13 @@ const settings = ref({
         <UiButton @click="showNewWarningToast">Mostrar warning</UiButton>
         <UiButton @click="showNewSuccessToast">Mostrar success</UiButton>
         <UiButton @click="showNewDefaultToast">Mostrar Default</UiButton>
+      </div>
+
+      <div class="flex md:flex-col space-y-4">
+        <UiButton intent="primary">Botón Primario</UiButton>
+        <UiButton intent="secondary">Botón Secundario</UiButton>
+        <UiButton intent="tertiary">Botón Terciario</UiButton>
+        <UiButton intent="danger">Botón Peligro</UiButton>
       </div>
     </div>
 

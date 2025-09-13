@@ -29,6 +29,9 @@ export const buttonStyles = cva(
         // Danger
         danger:
           'bg-transparent hover:bg-red-500 text-red-700 hover:text-white border border-red-500 hover:border-transparent focus:ring-red-300 focus:ring-offset-red-500 dark:text-red-300 dark:border-red-500 dark:hover:bg-red-500 dark:hover:text-white dark:focus:ring-red-300 dark:focus:ring-offset-gray-900',
+        // ✅ Añade la nueva variante `tertiary`
+        tertiary:
+          'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400 focus:ring-offset-gray-200 dark:bg-gray-600 dark:text-gray-100 dark:hover:bg-gray-500 dark:focus:ring-gray-500 dark:focus:ring-offset-gray-900',
       },
       size: {
         sm: 'text-sm py-1 px-2',
