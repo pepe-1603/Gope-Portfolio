@@ -47,15 +47,59 @@
           :max-rows="12"
           :disabled="isLocked"
         />
-        <UiFormField
-          label="URL de la Imagen"
-          type="url"
-          v-model="form.image_url"
-          id="project-image-url"
-          :disabled="isLocked"
-        >
-          <template #icon><FontAwesomeIcon icon="fa-solid fa-image" /></template>
-        </UiFormField>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Método de subida de imagen
+          </label>
+          <div class="flex gap-4">
+            <UiRadio
+              id="upload-method-file"
+              name="upload-method"
+              label="Subir Archivo"
+              value="file"
+              v-model="uploadMethod"
+              :disabled="isLocked"
+            />
+            <UiRadio
+              id="upload-method-url"
+              name="upload-method"
+              label="Pegar URL"
+              value="url"
+              v-model="uploadMethod"
+              :disabled="isLocked"
+            />
+          </div>
+        </div>
+        <UiDivider />
+        <div v-if="uploadMethod === 'file'">
+          <ImageUploader
+            label="Imagen de Portada"
+            :bucket-name="bucketName"
+            v-model="form.image_url"
+            :disabled="isLocked"
+            @upload-error="handleImageUploadError"
+          />
+          <UiAlert v-if="showAlternativeOption" intent="warning" class="mt-2">
+            <p>
+              Hubo un problema al subir la imagen. Intenta pegar la URL directamente o sube un
+              archivo diferente.
+            </p>
+          </UiAlert>
+        </div>
+
+        <div v-else-if="uploadMethod === 'url'">
+          <UiFormField
+            label="URL de la Imagen"
+            type="url"
+            v-model="form.image_url"
+            id="project-image-url"
+            :disabled="isLocked"
+          >
+            <template #icon><FontAwesomeIcon icon="fa-solid fa-image" /></template>
+          </UiFormField>
+        </div>
+
         <UiFormField
           label="URL del Proyecto en vivo"
           type="url"
@@ -156,7 +200,7 @@
           <img
             :src="form.image_url"
             alt="Vista previa del proyecto"
-            class="mt-2 w-full rounded-lg border-2 border-gray-300 dark:border-gray-600"
+            class="mt-2 w-full lg:max-h-[440px] rounded-lg border-2 border-gray-300 dark:border-gray-600"
           />
         </div>
         <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -194,13 +238,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, watch } from 'vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiFormField from '@/components/ui/UiFormField.vue'
 import UiTextarea from '@/components/ui/UiTextarea.vue'
 import UiSwitch from '@/components/ui/UiSwitch.vue'
 import UiChip from '@/components/ui/UiChip.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
+import ImageUploader from '@/components/ui/ImageUploader.vue'
+import UiRadio from '@/components/ui/UiRadio.vue' // Importa el nuevo componente
+import UiAlert from '@/components/ui/UiAlert.vue'
+import UiDivider from '@/components/UiDivider.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import {
@@ -215,7 +263,7 @@ import {
   faArrowsRotate,
   faFileSignature,
   faLock,
-  faLockOpen, // Nuevo icono para el modal de actualización
+  faLockOpen,
 } from '@fortawesome/free-solid-svg-icons'
 import type { Tables } from '@/types/supabase'
 import type { ProjectWithTechs } from '@/types/project'
@@ -267,21 +315,38 @@ export default defineComponent({
     const loading = ref(false)
     const showSummary = ref(false)
     const originalTitle = ref(props.projectData?.title || '')
-    const isLocked = ref(true) // Estado de bloqueo, inicialmente true
+    const isLocked = ref(true)
+    const uploadMethod = ref<'file' | 'url'>('file')
+    const showAlternativeOption = ref(false)
+    const bucketName = ref('')
+
+    // Observar si el proyecto ya tiene una URL de imagen para establecer el método de subida
+    watch(
+      () => props.projectData?.image_url,
+      (newVal) => {
+        if (newVal) {
+          uploadMethod.value = 'url'
+        }
+      },
+      { immediate: true },
+    )
 
     onMounted(async () => {
+      bucketName.value = import.meta.env.VITE_SUPABASE_PROJECTS_BUCKET
+
       const allTechsData = await techService.getAllTechs()
       if (allTechsData) {
         allTechs.value = allTechsData
       }
       if (props.projectData && props.projectData.project_techs) {
-        // Aseguramos que `project_techs` existe antes de mapear
         const techs = props.projectData.project_techs.map((pt) => pt.techs)
         selectedTechs.value = techs
-        // Log para confirmar que las techs se cargaron
-        console.log('Tecnologías del proyecto cargadas en el modal:', selectedTechs.value)
       }
     })
+
+    const handleImageUploadError = () => {
+      showAlternativeOption.value = true
+    }
 
     const toggleLock = () => {
       isLocked.value = !isLocked.value
@@ -304,12 +369,9 @@ export default defineComponent({
     }
 
     const proceedToSummary = () => {
-      // Si el título ha cambiado, regeneramos el slug
       if (form.value.title !== originalTitle.value) {
         form.value.slug = generateSlug(form.value.title)
       }
-      console.log('Datos a previsualizar:', form.value)
-      console.log('Tecnologías seleccionadas:', selectedTechs.value)
       showSummary.value = true
     }
 
@@ -325,12 +387,6 @@ export default defineComponent({
         repo_url: form.value.repo_url,
         is_published: form.value.is_published,
       }
-
-      console.log('Enviando datos para actualizar el proyecto:', projectPayload)
-      console.log(
-        'Enviando IDs de tecnologías para actualizar:',
-        selectedTechs.value.map((t) => t.id),
-      )
 
       try {
         await projectService.updateProjectAndTechs(
@@ -360,8 +416,12 @@ export default defineComponent({
       loading,
       showSummary,
       toggleTech,
-      isLocked, // Exponer la variable de estado
-      toggleLock, // Exponer la función para alternar
+      isLocked,
+      toggleLock,
+      uploadMethod,
+      showAlternativeOption,
+      bucketName,
+      handleImageUploadError,
       proceedToSummary,
       updateProject,
       handleCancel,
@@ -375,6 +435,10 @@ export default defineComponent({
     UiChip,
     UiSpinner,
     FontAwesomeIcon,
+    ImageUploader,
+    UiRadio,
+    UiAlert,
+    UiDivider,
   },
 })
 </script>

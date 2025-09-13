@@ -1,3 +1,4 @@
+<!--src/components/ui/UiDivider.vue-->
 <template>
   <div class="relative flex items-center w-full my-4">
     <!-- LÃ­nea del divisor -->

@@ -23,6 +23,7 @@ export const techService = {
   getAllTechs: async (): Promise<Tables<'techs'>[] | null> => {
     try {
       const { data, error } = await supabase.from(TECHS_TABLE).select('*')
+
       if (error) {
         console.error('Error fetching all technologies:', error.message)
         throw error

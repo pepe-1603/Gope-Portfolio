@@ -45,7 +45,7 @@
             v-if="isImage(file.name)"
             :src="file.publicUrl"
             :alt="file.name"
-            class="object-cover w-full h-32 md:h-40 lg:h-48  transition-transform duration-300 group-hover:scale-105"
+            class="object-cover w-full h-32 md:h-40 lg:h-48 transition-transform duration-300 group-hover:scale-105"
           />
           <div
             v-else
@@ -81,13 +81,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import {
-  faCopy,
-  faTrash,
-  faFile,
-  faFolderOpen,
-  faSpinner,
-} from '@fortawesome/free-solid-svg-icons'
+import { faCopy, faTrash, faFile, faFolderOpen, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import UiButton from '@/components/ui/UiButton.vue'
@@ -108,17 +102,15 @@ const bucketOptions = [
   { value: import.meta.env.VITE_SUPABASE_PROJECTS_BUCKET, label: 'Proyectos' },
   { value: import.meta.env.VITE_SUPABASE_ICONS_BUCKET, label: 'Íconos de Tecnologías' },
   { value: import.meta.env.VITE_SUPABASE_AVATARS_BUCKET, label: 'Avatares' },
-];
+]
 // Estado del componente
-const selectedBucket = ref(bucketOptions[0].value);
+const selectedBucket = ref(bucketOptions[0].value)
 const files = ref<any[]>([])
 const loading = ref(false)
 const hasError = ref(false)
 const fileInput = ref<HTMLInputElement | null>(null)
 const toastStore = useToastStore()
 const modal = useGlobalModal()
-
-
 
 // Tipos de archivo permitidos para cada bucket
 const fileAccept = computed(() => {
@@ -190,7 +182,7 @@ const handleDeleteFile = async (file: any) => {
   const result = await modal.showModal(
     ConfirmDeleteModal,
     { itemId: file.name, title: file.name }, // Usamos file.name como itemId
-    { },
+    {},
   )
 
   if (result?.action === 'confirm') {

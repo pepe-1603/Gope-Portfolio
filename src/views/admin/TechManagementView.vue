@@ -39,6 +39,7 @@ const fetchTechs = async (isLoadMore = false) => {
 
     const { data, count } = await techService.getPaginatedTechs(currentPage.value, limit)
     totalTechs.value = count || 0
+    console.log('data techs: ', techs.value)
 
     if (isLoadMore) {
       // ✅ AÑADIMOS los nuevos resultados a la lista existente
