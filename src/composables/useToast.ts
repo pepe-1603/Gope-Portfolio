@@ -1,3 +1,4 @@
+//src/composables/useToast.ts
 import { useToastStore, type Toast } from '@/stores/toast'
 
 /**
@@ -47,11 +48,23 @@ export function useToast() {
     showToast(message, 'warning', duration)
   }
 
+  // ✅ Añade los nuevos métodos de conveniencia
+  const upcoming = (message: string, duration?: number) => {
+    showToast(message, 'upcoming', duration)
+  }
+
+  const newFeature = (message: string, duration?: number) => {
+    showToast(message, 'new-feature', duration)
+  }
+
   return {
     showToast,
     success,
     error,
     info,
     warning,
+    // ✅ Exporta los nuevos métodos
+    upcoming,
+    newFeature,
   }
 }

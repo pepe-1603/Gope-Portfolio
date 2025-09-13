@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 export interface Toast {
   id: string // Identificador único para cada toast
   message: string
-  type: 'success' | 'error' | 'info' | 'warning' | 'default' // Tipos predefinidos para estilos
+  type: 'success' | 'error' | 'info' | 'warning' | 'default' | 'upcoming' | 'new-feature' // Tipos predefinidos para estilos
   duration?: number // Duración opcional en ms. Si no se especifica, usará un valor por defecto.
   isClosable?: boolean // Si el usuario puede cerrar el toast manualmente.
 }

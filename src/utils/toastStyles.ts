@@ -13,6 +13,8 @@ export const toastStyles = cva(
         info: 'border-blue-600 text-blue-600',
         warning: 'border-yellow-500 text-yellow-500',
         default: 'border-gray-700 text-gray-700',
+        upcoming: 'border-cyan-500 text-cyan-500', // ✅ Nuevo intent para 'novedades y new feature'
+        'new-feature': 'border-purple-600 text-purple-600',
       },
     },
     // El valor predeterminado si no se pasa `intent`
@@ -22,7 +24,7 @@ export const toastStyles = cva(
     compoundVariants: [
       // Estilos para el TEMA OSCURO
       {
-        intent: ['success', 'error', 'info', 'warning', 'default'],
+        intent: ['success', 'error', 'info', 'warning', 'default', 'upcoming', 'new-feature'], // ✅ Añadido 'upcoming y new-feature'
         class: 'dark:bg-gray-800 dark:border-gray-700',
       },
       // Estilos específicos para cada tipo en TEMA OSCURO
@@ -45,7 +47,15 @@ export const toastStyles = cva(
       {
         intent: 'default',
         class: 'dark:border-gray-400 dark:text-gray-400',
-        //{ intent: 'ghost', class: 'bg-gray-700 text-white dark:bg-gray-500' },
+      },
+      // ✅ Estilos para  nuevos intent
+      {
+        intent: 'upcoming',
+        class: 'dark:border-cyan-400 dark:text-cyan-400',
+      },
+      {
+        intent: 'new-feature',
+        class: 'dark:border-purple-400 dark:text-purple-400',
       },
     ],
   },

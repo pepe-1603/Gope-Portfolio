@@ -1,5 +1,4 @@
-
-<script setup lang="ts">
+<script setup lang="ts" name="PreviewCompoents">
 // pagina depruebna par acompeontes test
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
 import UiAlert from '@/components/ui/UiAlert.vue'
@@ -41,6 +40,42 @@ const notificationsEnabled = ref(false) // Esta variable se controlará internam
 // 1. Importa y usa el composable
 const toast = useToast()
 
+// Funciones para mostrar los toasts
+const showNewFeatureToast = () => {
+  // Usa el tipo 'new-feature' que definimos.
+  toast.showToast('¡Una nueva funcionalidad está disponible ahora!', 'new-feature')
+}
+
+const showUpComingToast = () => {
+  // Usa el tipo 'upcoming'.
+  toast.showToast('¡Próximamente! Una gran actualización está en camino.', 'upcoming')
+}
+
+const showNewInfoToast = () => {
+  // Usa el método de conveniencia para 'info'.
+  toast.info('Este es un mensaje de información.')
+}
+
+const showNewErrorToast = () => {
+  // Usa el método de conveniencia para 'error'.
+  toast.error('Ocurrió un error inesperado.')
+}
+
+const showNewWarningToast = () => {
+  // Usa el método de conveniencia para 'warning'.
+  toast.warning('Hay un problema que requiere tu atención.')
+}
+
+const showNewSuccessToast = () => {
+  // Usa el método de conveniencia para 'success'.
+  toast.success('¡Operación exitosa!')
+}
+
+const showNewDefaultToast = () => {
+  // Usa el método 'showToast' con el tipo 'default'.
+  toast.showToast('Este es el toast por defecto.', 'default')
+}
+
 toast.warning('Este es un warning.')
 toast.info('Este Es un Toast informativo.')
 toast.showToast('Preview Toast default !', 'default', 10000, false)
@@ -56,7 +91,6 @@ const handleLoginError = () => {
   // 3. Usa el método 'error' para un mensaje de fallo
   toast.error('Credenciales incorrectas. Inténtalo de nuevo.')
 }
-
 
 const form = ref({
   bio: '',
@@ -81,49 +115,51 @@ const settings = ref({
   notifications: true,
   betaFeatures: false,
 })
-
-
 </script>
 
 <template>
   <div class="about">
+    <div class="p-8 space-y-4">
+      <div class="inline-flex items-center justify-center px-1 py-0.5 gap-1">
+        <div class="inline-flex items-center justify-center rounded-full bg-green-200/65 p-1">
+          <div class="size-2 rounded-full bg-green-500 animate-spin"></div>
+        </div>
+        <p class="text-gray-600 text-xs self-end">Conectado</p>
+      </div>
 
-<div class="p-8 space-y-4">
+      <br /><br />
+      <div class="p-8 space-y-4">
+        <StatusIndicator />
 
+        <StatusIndicator color="red" animated />
 
-  <div class="inline-flex items-center justify-center px-1 py-0.5 gap-1 ">
-    <div class="inline-flex items-center justify-center rounded-full bg-green-200/65 p-1">
-      <div class="size-2 rounded-full bg-green-500 animate-spin"></div>
+        <StatusIndicator size="lg" text="En línea" />
+
+        <StatusIndicator color="blue" size="xl" text="Conectado" animated />
+        <StatusIndicator color="rose" size="xs" text="Desconectado" animated />
+        <StatusIndicator color="green" text="Online" animated />
+      </div>
+
+      <div class="p-4 divider-x divide-x-4 space-x-4">
+        <UiButton @click="showNewFeatureToast">Mostrar Novedad</UiButton>
+        <UiButton @click="showUpComingToast">Mostrar UpComing</UiButton>
+        <UiButton @click="showNewInfoToast">Mostrar Info</UiButton>
+        <UiButton @click="showNewErrorToast">Mostrar Error</UiButton>
+        <UiButton @click="showNewWarningToast">Mostrar warning</UiButton>
+        <UiButton @click="showNewSuccessToast">Mostrar success</UiButton>
+        <UiButton @click="showNewDefaultToast">Mostrar Default</UiButton>
+      </div>
     </div>
-    <p class="text-gray-600 text-xs self-end">Conectado</p>
-  </div>
-
-    <br><br>
-<div class="p-8 space-y-4">
- <StatusIndicator />
-
-    <StatusIndicator color="red" animated />
-
-    <StatusIndicator size="lg" text="En línea" />
-
-    <StatusIndicator color="blue" size="xl" text="Conectado" animated />
-    <StatusIndicator color="rose" size="xs" text="Desconectado" animated />
-    <StatusIndicator color="green"  text="Online" animated />
-  </div>
-
-  </div>
 
     <div class="container mx-auto p-6">
       <h1>Seccion de Componentes Genericos y Skeletons</h1>
-      <UiDivider :icon="TicketIcon" color="green" label="List Projects"/>
-      <SkeletonListProjects/>
-      <UiDivider :icon="TagIcon" color="blue" label="List Techs"/>
-      <SkeletonListTechs/>
-      <UiDivider :icon="PhoneIcon" color="purple" label="List Experience"/>
-      <SkeletonListExperience/>
-
+      <UiDivider :icon="TicketIcon" color="green" label="List Projects" />
+      <SkeletonListProjects />
+      <UiDivider :icon="TagIcon" color="blue" label="List Techs" />
+      <SkeletonListTechs />
+      <UiDivider :icon="PhoneIcon" color="purple" label="List Experience" />
+      <SkeletonListExperience />
     </div>
-
 
     <div :class="{ 'dark bg-gray-900 text-white': isDarkMode }" class="p-8 space-y-8 min-h-screen">
       <ThemeSwitch />
@@ -348,16 +384,9 @@ const settings = ref({
             <button @click="handleLoginError" class="bg-red-500 text-white p-3 rounded-md">
               Login Fallido
             </button>
-            <button class="bg-indigo-500 text-white p-3 rounded-md" >
-              Abrir Login
-            </button>
+            <button class="bg-indigo-500 text-white p-3 rounded-md">Abrir Login</button>
 
-            <button
-
-              class="px-4 py-2 rounded-md bg-orange-500 text-white"
-            >
-              Eliminar Item #42
-            </button>
+            <button class="px-4 py-2 rounded-md bg-orange-500 text-white">Eliminar Item #42</button>
           </div>
 
           <div class="p-8">
@@ -368,9 +397,7 @@ const settings = ref({
               placeholder="Tu correo electrónico"
               class="w-full p-2 mb-4 border rounded"
             />
-            <button  class="bg-blue-500 text-white p-3 rounded-md">
-              Restablecer Contraseña
-            </button>
+            <button class="bg-blue-500 text-white p-3 rounded-md">Restablecer Contraseña</button>
           </div>
         </div>
       </div>
