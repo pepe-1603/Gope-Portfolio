@@ -8,40 +8,57 @@ import { faEye, faPen, faTrash, faChevronDown } from '@fortawesome/free-solid-sv
 import { MenuItem } from '@headlessui/vue'
 import { EllipsisVerticalIcon } from '@heroicons/vue/20/solid'
 
-// Añade los íconos de la biblioteca. faChevronDown para el dropdown.
 library.add(faEye, faPen, faTrash, faChevronDown)
 
-// Define las props para el ítem de tecnología
 defineProps<{
   tech: Tables<'techs'>
   techDescription?: string
+  // ✅ NUEVA PROP para la vista
+  isGridItem?: boolean
 }>()
 
-// Define los eventos que este componente emitirá
 const emit = defineEmits(['edit', 'delete', 'view'])
 </script>
 
 <template>
   <li
-    class="flex justify-between items-center gap-x-6 py-4 px-4 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md shadow-sm transition-colors duration-200"
+    class="bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-md shadow-sm transition-colors duration-200 p-4"
+    :class="{
+      'flex justify-between items-center gap-x-6': !isGridItem,
+      'flex flex-col items-center justify-center text-center': isGridItem,
+    }"
   >
-    <div class="flex min-w-0 gap-x-4">
+    <div class="flex min-w-0 gap-x-4" :class="{ 'flex-col items-center': isGridItem }">
       <img
         :src="tech.icon_url || 'https://via.placeholder.com/50'"
         :alt="`Ícono de ${tech.name}`"
-        class="size-16 flex-none rounded-full object-contain object-center"
+        class="size-16 flex-none rounded-full object-scale-down object-center"
+        :class="{
+          'mb-2': isGridItem,
+          'size-16': !isGridItem,
+          'size-24': isGridItem,
+        }"
       />
       <div class="min-w-0 flex-auto">
         <h4 class="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100">
           {{ tech.name }}
         </h4>
-        <p v-if="techDescription" class="mt-1 truncate text-xs leading-5 text-gray-500">
+        <p
+          v-if="techDescription"
+          class="mt-1 truncate text-xs leading-5 text-gray-500 whitespace-break-spaces"
+        >
           {{ techDescription }}
         </p>
       </div>
     </div>
 
-    <div class="flex items-center space-x-2">
+    <div
+      class="flex items-center space-x-2"
+      :class="{
+        'mt-4': isGridItem,
+        'mt-0': !isGridItem,
+      }"
+    >
       <UiButton @click="emit('view', tech)" intent="info" size="sm" class="rounded-full text-xs">
         <FontAwesomeIcon icon="fa-solid fa-eye" class="mr-1" /> Ver
       </UiButton>

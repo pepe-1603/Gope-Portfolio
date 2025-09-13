@@ -1,3 +1,73 @@
+<template>
+  <div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold dark:text-gray-100">Gestión de Tecnologías</h2>
+      <div class="flex space-x-2 items-center">
+        <UiButton
+          @click="toggleViewMode"
+          intent="secondary"
+          size="md"
+          :aria-label="`Cambiar a vista de ${isGridView ? 'lista' : 'mosaico'}`"
+        >
+          <FontAwesomeIcon :icon="isGridView ? 'fa-solid fa-list' : 'fa-solid fa-grip'" />
+        </UiButton>
+        <UiButton
+          @click="toggleSortOrder"
+          intent="secondary"
+          size="md"
+          :aria-label="`Ordenar de forma ${isAscending ? 'descendente' : 'ascendente'}`"
+        >
+          <FontAwesomeIcon :icon="isAscending ? 'fa-arrow-down-a-z' : 'fa-arrow-up-a-z'" />
+        </UiButton>
+        <UiButton @click="handleCreateTech" intent="primary">
+          <FontAwesomeIcon icon="fa-solid fa-plus" class="mr-2" />Crear Nueva
+        </UiButton>
+      </div>
+    </div>
+
+    <AdminList
+      :items="sortedTechs"
+      :loading="loading"
+      :has-error="hasError"
+      empty-message="No hay tecnologías para mostrar."
+      :is-grid="isGridView"
+    >
+      <template #loading>
+        <SkeletonListTechs v-if="!isGridView" />
+        <div v-else>Cargando vista de mosaico...</div>
+      </template>
+
+      <template #default="{ items }">
+        <transition-group
+          name="fade"
+          tag="ul"
+          :class="{
+            'divide-y divide-gray-100 dark:divide-gray-800 gap-2': !isGridView,
+            'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4': isGridView,
+          }"
+        >
+          <TechListItem
+            v-for="tech in items"
+            :key="tech.id"
+            :tech="tech"
+            :tech-description="`ID: ${tech.id}`"
+            @view="handleViewTech(tech)"
+            @edit="handleEditTech(tech)"
+            @delete="handleDeleteTech(tech.id, tech.name)"
+            :is-grid-item="isGridView"
+          />
+        </transition-group>
+      </template>
+    </AdminList>
+    <div v-if="hasMoreTechs" class="mt-6 text-center">
+      <UiButton intent="secondary" full-width @click="loadMoreTechs" :disabled="loadingMore">
+        <span v-if="loadingMore">Cargando...</span>
+        <span v-else>Ver más tecnologías</span>
+      </UiButton>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts" name="TechManagementView">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
@@ -5,13 +75,24 @@ import { techService } from '@/services/techService'
 import { useGlobalModal } from '@/composables/useGlobalModal'
 import { useToastStore } from '@/stores/toast'
 import UiButton from '@/components/ui/UiButton.vue'
-import SkeletonListTechs from '@/components/ui/skeletons/SkeletonListTechs.vue' // Asegúrate de tener este componente
-import AdminList from '@/components/ui/AdminList.vue' // Importa el nuevo componente genérico
-import TechListItem from '@/components/admin/TechListItem.vue' // Importa el nuevo ítem de tecnología
+import SkeletonListTechs from '@/components/ui/skeletons/SkeletonListTechs.vue'
+import AdminList from '@/components/ui/AdminList.vue'
+import TechListItem from '@/components/admin/TechListItem.vue'
 import ConfirmDeleteModal from '@/components/ui/modals/ConfirmDeleteModal.vue'
-import type { Tables } from '@/types/supabase'
 import CreateTechModal from '@/components/ui/modals/CreateTechModal.vue'
 import TechFormModal from '@/components/ui/modals/TechFormModal.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import {
+  faList,
+  faGrip,
+  faPlus,
+  faArrowDownAZ,
+  faArrowUpAZ,
+} from '@fortawesome/free-solid-svg-icons'
+import type { Tables } from '@/types/supabase'
+
+library.add(faList, faGrip, faArrowDownAZ, faArrowUpAZ, faPlus)
 
 const router = useRouter()
 const modal = useGlobalModal()
@@ -21,10 +102,33 @@ const techs = ref<Tables<'techs'>[] | null>(null)
 const loading = ref(true)
 const loadingMore = ref(false)
 const hasError = ref(false)
-// ✅ VARIABLES DE PAGINACIÓN
 const currentPage = ref(0)
-const limit = 10 // Número de ítems por página
+const limit = 10
 const totalTechs = ref(0)
+
+// ✅ NUEVAS VARIABLES DE ESTADO
+const isGridView = ref(false)
+const isAscending = ref(true)
+
+const toggleViewMode = () => {
+  isGridView.value = !isGridView.value
+}
+
+const toggleSortOrder = () => {
+  isAscending.value = !isAscending.value
+}
+
+// ✅ COMPUTADA PARA ORDENAR LOS DATOS
+const sortedTechs = computed(() => {
+  if (!techs.value) return []
+  return [...techs.value].sort((a, b) => {
+    const nameA = a.name.toLowerCase()
+    const nameB = b.name.toLowerCase()
+    if (nameA < nameB) return isAscending.value ? -1 : 1
+    if (nameA > nameB) return isAscending.value ? 1 : -1
+    return 0
+  })
+})
 
 const fetchTechs = async (isLoadMore = false) => {
   try {
@@ -39,10 +143,8 @@ const fetchTechs = async (isLoadMore = false) => {
 
     const { data, count } = await techService.getPaginatedTechs(currentPage.value, limit)
     totalTechs.value = count || 0
-    console.log('data techs: ', techs.value)
 
     if (isLoadMore) {
-      // ✅ AÑADIMOS los nuevos resultados a la lista existente
       techs.value = techs.value ? [...techs.value, ...(data || [])] : data
     } else {
       techs.value = data
@@ -56,7 +158,6 @@ const fetchTechs = async (isLoadMore = false) => {
   }
 }
 
-// ✅ COMPUTADA para saber si hay más páginas
 const hasMoreTechs = computed(() => {
   if (!techs.value || totalTechs.value === null) return false
   return techs.value.length < totalTechs.value
@@ -67,37 +168,25 @@ onMounted(() => {
 })
 
 const handleViewTech = (tech: Tables<'techs'>) => {
-  // Navegamos a la nueva página de previsualización de la tecnología
   router.push({ name: 'admin-tech-preview', params: { id: tech.id } })
 }
 
-// ✅ LÓGICA DEL BOTÓN "VER MÁS"
 const loadMoreTechs = () => {
-  console.log('Cargando más tecnologías...')
   currentPage.value++
   fetchTechs(true)
 }
 
-// ✅ Lógica de creación del modal
 const handleCreateTech = async () => {
   const result = await modal.showModal(CreateTechModal, {}, { title: 'Crear Nueva Tecnología' })
-
-  // Si el modal se cierra con 'confirm'
   if (result?.action === 'confirm') {
-    await fetchTechs() // Vuelve a cargar la lista de tecnologías para ver el cambio
+    await fetchTechs()
     toastStore.addToast({ message: 'Tecnología creada con éxito.', type: 'success' })
   }
 }
 
 const handleEditTech = async (tech: Tables<'techs'>) => {
   try {
-    // Añadimos un log para ver la data recibida
-    console.log('Datos de la tecnología a editar:', tech)
-    const result = await modal.showModal(
-      TechFormModal, // ✅ USAMOS EL NUEVO MODAL DE ACTUALIZACIÓN
-      { tech }, // ✅ PASAMOS EL OBJETO DE LA TECNOLOGÍA COMO PROP
-      {},
-    )
+    const result = await modal.showModal(TechFormModal, { tech }, {})
     if (result?.action === 'confirm') {
       await fetchTechs()
       toastStore.addToast({ message: 'Tecnología actualizada con éxito.', type: 'success' })
@@ -128,42 +217,21 @@ const handleDeleteTech = async (techId: string, techName: string) => {
 }
 </script>
 
-<template>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold dark:text-gray-100">Gestión de Tecnologías</h2>
-      <UiButton @click="handleCreateTech" intent="primary"> Crear Nueva Tecnología </UiButton>
-    </div>
+<style scoped>
+/* 3. Transiciones */
+.fade-move,
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
 
-    <AdminList
-      :items="techs"
-      :loading="loading"
-      :has-error="hasError"
-      empty-message="No hay tecnologías para mostrar."
-    >
-      <template #loading>
-        <SkeletonListTechs />
-      </template>
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scaleY(0.01) translateZ(0);
+}
 
-      <template #default="{ items }">
-        <ul role="list" class="divide-y divide-gray-100 dark:divide-gray-800 gap-2">
-          <TechListItem
-            v-for="tech in items"
-            :key="tech.id"
-            :tech="tech"
-            :tech-description="`ID: ${tech.id}`"
-            @view="handleViewTech(tech)"
-            @edit="handleEditTech(tech)"
-            @delete="handleDeleteTech(tech.id, tech.name)"
-          />
-        </ul>
-      </template>
-    </AdminList>
-    <div v-if="hasMoreTechs" class="mt-6 text-center">
-      <UiButton intent="secondary" full-width @click="loadMoreTechs" :disabled="loadingMore">
-        <span v-if="loadingMore">Cargando...</span>
-        <span v-else>Ver más tecnologías</span>
-      </UiButton>
-    </div>
-  </div>
-</template>
+.fade-leave-active {
+  position: absolute;
+}
+</style>

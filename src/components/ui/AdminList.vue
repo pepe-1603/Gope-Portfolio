@@ -1,14 +1,14 @@
-<!--src/components/ui/AdminList.vue-->
 <script setup lang="ts" generic="T">
-import UiAlert from './UiAlert.vue';
+import UiAlert from './UiAlert.vue'
 
-// Define las props genéricas para aceptar cualquier tipo de datos
 defineProps<{
-  items: T[] | null;
-  loading: boolean;
-  hasError: boolean;
-  emptyMessage: string;
-}>();
+  items: T[] | null
+  loading: boolean
+  hasError: boolean
+  emptyMessage: string
+  // ✅ NUEVA PROP para la vista
+  isGrid?: boolean
+}>()
 </script>
 
 <template>
@@ -35,7 +35,7 @@ defineProps<{
     </div>
 
     <div v-else class="space-y-4">
-      <slot name="default" :items="items" />
+      <slot name="default" :items="items" :is-grid="isGrid" />
     </div>
   </div>
 </template>
