@@ -75,7 +75,7 @@ const handleMove = () => {
       }"
     >
       <div class="flex items-center space-x-2">
-        <UiButton @click="emit('preview', project.slug)" intent="secondary" size="sm">
+        <UiButton @click="emit('preview', project)" intent="secondary" size="sm">
           <FontAwesomeIcon icon="fa-solid fa-arrow-up-right-from-square" class="mr-1" /> Preview
         </UiButton>
 

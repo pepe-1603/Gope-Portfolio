@@ -1,41 +1,48 @@
 <!--src/view/admin/ProjectPreviewView.vue-->
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { projectService } from '@/services/projectService.ts';
-import UiBadge from '@/components/ui/UiBadge.vue';
-import ProjectDetailSkeleton from '@/components/ui/skeletons/ProjectDetailSkeleton.vue';
-import { faGlobe, faLink } from '@fortawesome/free-solid-svg-icons';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import { getTechColor } from '@/utils/badgeStyles';
-import UiCollapsible from '@/components/ui/UiCollapsible.vue';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import type { ProjectWithTechs } from '@/types/project';
-import UiAlert from '@/components/ui/UiAlert.vue';
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { projectService } from '@/services/projectService.ts'
+import UiBadge from '@/components/ui/UiBadge.vue'
+import ProjectDetailSkeleton from '@/components/ui/skeletons/ProjectDetailSkeleton.vue'
+import { faGlobe, faLink } from '@fortawesome/free-solid-svg-icons'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { getTechColor } from '@/utils/badgeStyles'
+import UiCollapsible from '@/components/ui/UiCollapsible.vue'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import type { ProjectWithTechs } from '@/types/project'
+import UiAlert from '@/components/ui/UiAlert.vue'
 
 // Añade el nuevo ícono a la biblioteca
-library.add(faGithub, faLink, faGlobe);
+library.add(faGithub, faLink, faGlobe)
 
-const route = useRoute();
-const errorFetch = ref<string | null>(null);
-const project = ref<ProjectWithTechs | null>(null);
+const route = useRoute()
+const errorFetch = ref<string | null>(null)
+const project = ref<ProjectWithTechs | null>(null)
 
 onMounted(async () => {
   try {
-    const projectId = route.params.id as string;
+    const projectId = route.params.id as string
 
-    const fetchedProject = await projectService.getProjectById(projectId);
-    console.log("DAta del servicico: ",fetchedProject);
+    // Si la ruta no tiene un ID, mostramos un error
+    if (!projectId) {
+      errorFetch.value = 'ID de proyecto no proporcionado.'
+      return
+    }
+
+    const fetchedProject = await projectService.getProjectById(projectId)
 
     if (fetchedProject) {
-      project.value = fetchedProject;
+      project.value = fetchedProject
+    } else {
+      errorFetch.value = 'Tecnología no encontrada.'
     }
   } catch (err) {
-    console.error('Error cargando proyecto:', err);
-    errorFetch.value = 'No se pudo cargar el proyecto o no tienes permisos.';
-    project.value = null;
+    console.error('Error cargando proyecto:', err)
+    errorFetch.value = 'No se pudo cargar el proyecto o no tienes permisos.'
+    project.value = null
   }
-});
+})
 </script>
 
 <template>
@@ -96,10 +103,12 @@ onMounted(async () => {
           <div class="flex flex-col sm:flex-row items-start justify-start">
             <p>
               <strong class="font-medium text-gray-800 dark:text-gray-100">Creado en:</strong>
-                {{ new Date(project.created_at).toLocaleDateString() }}
+              {{ new Date(project.created_at).toLocaleDateString() }}
             </p>
             <p v-if="project.updated_at != project.created_at">
-              <strong class="font-medium text-gray-800 dark:text-gray-100">Última actualización:</strong>
+              <strong class="font-medium text-gray-800 dark:text-gray-100"
+                >Última actualización:</strong
+              >
               {{ new Date(project.updated_at).toLocaleDateString() }}
             </p>
           </div>
@@ -107,9 +116,10 @@ onMounted(async () => {
       </div>
 
       <div class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+        <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-2 pb-2">
           Descripción del Proyecto
         </h2>
+
         <UiCollapsible title="Leer descripción completa" class="my-6">
           <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
             {{ project.description }}
@@ -118,7 +128,9 @@ onMounted(async () => {
       </div>
 
       <div class="mb-8">
-        <h2 class="text-2xl font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+        <h2
+          class="text-2xl font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2"
+        >
           Tecnologías utilizadas
         </h2>
         <div class="flex flex-wrap gap-2">

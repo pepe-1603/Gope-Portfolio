@@ -56,7 +56,7 @@
             v-for="project in items"
             :key="project.id"
             :project="project"
-            @preview="handlePreviewProject(project.slug)"
+            @preview="handlePreviewProject(project)"
             @edit="handleEditProject(project.slug)"
             @delete="handleDeleteProject(project.id, project.title)"
             :is-grid-item="isGridView"
@@ -176,8 +176,8 @@ const handleEditProject = async (slug: string) => {
   }
 }
 
-const handlePreviewProject = (slug: string) => {
-  const url = router.resolve({ name: 'admin-project-preview', params: { slug } }).href
+const handlePreviewProject = (project: Tables<'projects'>) => {
+  const url = router.resolve({ name: 'admin-project-preview', params: { id: project.id } }).href
   window.open(url, '_blank')
 }
 

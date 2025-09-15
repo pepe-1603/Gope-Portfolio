@@ -32,7 +32,7 @@ onMounted(async () => {
 
     if (fetchedTech) {
       tech.value = fetchedTech
-      console.log('Tecnología cargada:', fetchedTech)
+      //console.log('Tecnología cargada:', fetchedTech)
     } else {
       errorFetch.value = 'Tecnología no encontrada.'
     }
