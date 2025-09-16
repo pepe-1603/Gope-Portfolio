@@ -6,6 +6,12 @@ import type { ProjectWithTechs } from '@/types/project'
 
 const PROJECTS_TABLE = 'projects'
 
+// ✅ AÑADIDO: Define el tipo de dato para la respuesta paginada
+export interface PaginatedResponse<T> {
+  data: T[] | null
+  count: number | null
+}
+
 /**
  * Servicio para interactuar con la tabla de 'projects' en Supabase.
  * Proporciona métodos para obtener, crear, actualizar y eliminar proyectos.
@@ -15,14 +21,26 @@ export const projectService = {
    * Obtiene una lista de todos los proyectos.
    * @returns {Promise<Tables<'projects'>[] | null>} Una promesa que resuelve con un array de proyectos o null.
    */
-  getAllProjects: async (): Promise<Tables<'projects'>[] | null> => {
+  getAllProjects: async (
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResponse<Tables<'projects'>>> => {
     try {
-      const { data, error } = await supabase.from(PROJECTS_TABLE).select('*')
+      const start = page * limit
+      const end = start + limit - 1
+
+      // ✅ CAMBIO: Usamos `select` con `count: 'exact'` y `range`
+      const { data, count, error } = await supabase
+        .from(PROJECTS_TABLE)
+        .select('*', { count: 'exact' })
+        .order('created_at', { ascending: false })
+        .range(start, end)
+
       if (error) {
         console.error('Error fetching all projects:', error.message)
         throw error
       }
-      return data
+      return { data, count }
     } catch (error) {
       console.error('Error in getAllProjects:', error)
       throw error
@@ -31,32 +49,34 @@ export const projectService = {
 
   /**
    * Obtiene una lista paginada de proyectos.
-   * @param page El número de página (empieza en 1).
-   * @param itemsPerPage La cantidad de elementos por página.
-   * @returns {Promise<Tables<'projects'>[] | null>} Una promesa que resuelve con un array de proyectos o null.
+   * @param page El número de página (basada en 0, no en 1).
+   * @param limit La cantidad de elementos por página.
+   * @returns {Promise<PaginatedResponse<Tables<'projects'>>>} Una promesa que resuelve con los datos y el conteo total.
    */
-  getProjectsByPage: async (
+  getPaginatedProjects: async (
     page: number,
-    itemsPerPage: number,
-  ): Promise<Tables<'projects'>[] | null> => {
+    limit: number,
+  ): Promise<PaginatedResponse<Tables<'projects'>>> => {
     try {
-      const start = (page - 1) * itemsPerPage
-      const end = start + itemsPerPage - 1
+      const start = page * limit
+      const end = start + limit - 1
 
-      const { data, error } = await supabase
+      // ✅ CAMBIO: Usamos `select` con `count: 'exact'` y `range`
+      const { data, count, error } = await supabase
         .from(PROJECTS_TABLE)
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('is_published', true)
-        .order('created_at', { ascending: false }) // Opcional: ordenar por fecha de creación
+        .order('created_at', { ascending: false })
         .range(start, end)
 
       if (error) {
         console.error('Error fetching paginated projects:', error.message)
         throw error
       }
-      return data
+      // ✅ RETORNA AMBOS: datos y conteo
+      return { data, count }
     } catch (error) {
-      console.error('Error in getProjectsByPage:', error)
+      console.error('Error in getPaginatedProjects:', error)
       throw error
     }
   },

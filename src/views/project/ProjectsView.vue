@@ -3,7 +3,7 @@
     <h1 class="text-3xl font-bold text-center mb-8 dark:text-white">Mis Proyectos</h1>
 
     <div v-if="isLoadingInitial" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <ProjectCardSkeleton v-for="n in 6" :key="n" />
+      <ProjectCardSkeleton v-for="n in projectsPerPage" :key="n" />
     </div>
 
     <div v-else-if="error" class="text-center text-red-500">
@@ -29,19 +29,17 @@
 
     <div v-else>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div v-for="project in projects" :key="project.id">
-          <ProjectCard :project="project" />
-        </div>
+        <ProjectCard v-for="project in projects" :key="project.id" :project="project" />
       </div>
 
-      <InfiniteScrollSentinel @intersect="loadMoreProjects" />
+      <InfiniteScrollSentinel v-if="hasMoreProjects" @intersect="loadMoreProjects" />
 
       <div v-if="isLoadingMore" class="flex justify-center my-8">
-        <UiLoader />
+        <UiSpinner message="cargando..." />
       </div>
 
       <p
-        v-if="!hasMoreProjects && projects && projects.length > 0"
+        v-if="!hasMoreProjects && projects && projects.length > 0 && !isLoadingMore"
         class="text-center text-gray-500 mt-8"
       >
         No hay más proyectos para mostrar.
@@ -51,70 +49,63 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { projectService } from '@/services/projectService'
 import UiAlert from '@/components/ui/UiAlert.vue'
 import ProjectCard from '@/components/project/ProjectCard.vue'
 import ProjectCardSkeleton from '@/components/ui/skeletons/ProjectCardSkeleton.vue'
 import InfiniteScrollSentinel from '@/components/common/InfiniteScrollSentinel.vue'
-import UiLoader from '@/components/ui/UiLoader.vue'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { faFaceFrown } from '@fortawesome/free-solid-svg-icons'
-import type { Tables } from '@/types/supabase' // <-- Importamos el tipo 'Tables'
+import type { Tables } from '@/types/supabase'
 
-// Tipado de las referencias reactivas
 const projects = ref<Tables<'projects'>[] | null>([])
 const isLoadingInitial = ref(true)
 const isLoadingMore = ref(false)
 const error = ref<string | null>(null)
-const page = ref(1)
+const page = ref(0)
 const projectsPerPage = 6
-const hasMoreProjects = ref(true)
+const totalProjectsCount = ref(0)
 
-const fetchProjects = async (pageNumber = 1) => {
+const hasMoreProjects = computed(() => {
+  if (!projects.value) return false
+  return projects.value.length < totalProjectsCount.value
+})
+
+const fetchProjects = async (isLoadMore = false) => {
   error.value = null
-  const currentProjects = projects.value || [] // Para evitar `null` en `projects.value`
-
-  if (pageNumber === 1) {
+  if (!isLoadMore) {
     isLoadingInitial.value = true
-    projects.value = null // Limpiar el estado de proyectos en la carga inicial
+    projects.value = []
+    page.value = 0
+    totalProjectsCount.value = 0
   } else {
     isLoadingMore.value = true
   }
-
   try {
-    const fetchedProjects = await projectService.getProjectsByPage(pageNumber, projectsPerPage)
-
-    if (fetchedProjects === null || fetchedProjects.length === 0) {
-      hasMoreProjects.value = false
-      if (pageNumber === 1) {
-        projects.value = [] // Si no hay proyectos, inicializamos a un array vacío
-      }
-    } else {
-      projects.value = [...currentProjects, ...fetchedProjects]
+    const { data, count } = await projectService.getPaginatedProjects(page.value, projectsPerPage)
+    if (data) {
+      projects.value = [...(projects.value || []), ...data]
     }
+    totalProjectsCount.value = count || 0
   } catch (err: any) {
     console.error('Error fetching projects:', err)
     error.value = 'No se pudieron cargar los proyectos. Por favor, verifica tu conexión.'
   } finally {
-    if (pageNumber === 1) {
-      setTimeout(() => {
-        isLoadingInitial.value = false
-      }, 500)
-    } else {
-      isLoadingMore.value = false
-    }
+    isLoadingInitial.value = false
+    isLoadingMore.value = false
   }
 }
 
-const loadMoreProjects = async () => {
-  if (!hasMoreProjects.value || isLoadingMore.value) {
+const loadMoreProjects = () => {
+  if (!hasMoreProjects.value || isLoadingMore.value || isLoadingInitial.value) {
     return
   }
   page.value++
-  await fetchProjects(page.value)
+  fetchProjects(true)
 }
 
-onMounted(async () => {
-  await fetchProjects()
+onMounted(() => {
+  fetchProjects()
 })
 </script>

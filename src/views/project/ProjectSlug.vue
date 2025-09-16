@@ -14,6 +14,16 @@
         class="w-full min-h-64 max-h-80 object-cover rounded-lg mb-6 shadow-md"
       />
 
+      <div
+        v-else
+        class="w-full min-h-64 max-h-80 flex items-center justify-center rounded-lg mb-6 shadow-md bg-gray-100 dark:bg-gray-800"
+      >
+        <div class="text-center text-gray-400 dark:text-gray-500">
+          <FontAwesomeIcon icon="fas fa-image" class="size-14" />
+          <span class="block mt-2">No se ha proporcionado una imagen para este proyecto.</span>
+        </div>
+      </div>
+
       <p class="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed font-semibold">
         {{ project.summary }}
       </p>
@@ -64,15 +74,16 @@ import { useRoute } from 'vue-router'
 import { projectService } from '@/services/projectService.ts'
 import UiBadge from '@/components/ui/UiBadge.vue'
 import ProjectDetailSkeleton from '@/components/ui/skeletons/ProjectDetailSkeleton.vue'
-import { faLink } from '@fortawesome/free-solid-svg-icons'
+import { faImage, faLink } from '@fortawesome/free-solid-svg-icons'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { getTechColor } from '@/utils/badgeStyles'
 import UiCollapsible from '@/components/ui/UiCollapsible.vue'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import type { ProjectWithTechs } from '@/types/project'
 import UiAlert from '@/components/ui/UiAlert.vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faGithub, faLink)
+library.add(faGithub, faLink, faImage)
 
 const route = useRoute()
 const errorFetch = ref<string | null>(null)

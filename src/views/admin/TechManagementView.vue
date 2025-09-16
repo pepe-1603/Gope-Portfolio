@@ -61,7 +61,7 @@
     </AdminList>
     <div v-if="hasMoreTechs" class="mt-6 text-center">
       <UiButton intent="secondary" full-width @click="loadMoreTechs" :disabled="loadingMore">
-        <span v-if="loadingMore">Cargando...</span>
+        <UiSpinner v-if="loadingMore" message="Cargando..." />
         <span v-else>Ver más tecnologías</span>
       </UiButton>
     </div>
@@ -91,6 +91,7 @@ import {
   faArrowUpAZ,
 } from '@fortawesome/free-solid-svg-icons'
 import type { Tables } from '@/types/supabase'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
 
 library.add(faList, faGrip, faArrowDownAZ, faArrowUpAZ, faPlus)
 

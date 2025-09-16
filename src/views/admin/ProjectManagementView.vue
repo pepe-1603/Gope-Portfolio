@@ -40,7 +40,11 @@
       </template>
 
       <template #error-message>
-        No se pudieron cargar los proyectos. Por favor, inténtalo de nuevo más tarde.
+        <UiAlert
+          intent="danger"
+          title="Error"
+          description="No se pudieron cargar los proyectos. Por favor, inténtalo de nuevo más tarde."
+        />
       </template>
 
       <template #default="{ items }">
@@ -64,6 +68,12 @@
         </transition-group>
       </template>
     </AdminList>
+    <div v-if="hasMoreProjects" class="mt-6 text-center">
+      <UiButton intent="secondary" full-width @click="loadMoreProjects" :disabled="loadingMore">
+        <UiSpinner v-if="loadingMore" message="cargando..." />
+        <span v-else>Ver más proyectos</span>
+      </UiButton>
+    </div>
   </div>
 </template>
 
@@ -71,7 +81,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGlobalModal } from '@/composables/useGlobalModal'
-import { useToastStore } from '@/stores/toast'
 import { projectService } from '@/services/projectService'
 import UiButton from '@/components/ui/UiButton.vue'
 import SkeletonListProjects from '@/components/ui/skeletons/SkeletonListProjects.vue'
@@ -92,16 +101,25 @@ import {
 import type { Tables } from '@/types/supabase'
 import type { ModalResult } from '@/types/modal'
 import type { ProjectWithTechs } from '@/types/project'
+import { useToast } from '@/composables/useToast'
+import UiAlert from '@/components/ui/UiAlert.vue'
+import UiSpinner from '@/components/ui/UiSpinner.vue'
 
 library.add(faList, faGrip, faArrowDownAZ, faArrowUpAZ, faPlus)
 
 const router = useRouter()
 const modal = useGlobalModal()
-const toastStore = useToastStore()
+const toast = useToast()
 
 const projects = ref<Tables<'projects'>[] | null>(null)
 const loading = ref(true)
 const hasError = ref(false)
+
+// ✅ AÑADIDO: Variables de estado para la paginación
+const currentPage = ref(0)
+const limit = 10 // O el número de elementos que desees por página
+const totalProjects = ref(0)
+const loadingMore = ref(false)
 
 // ✅ NUEVAS VARIABLES DE ESTADO
 const isGridView = ref(false)
@@ -127,17 +145,46 @@ const sortedProjects = computed(() => {
   })
 })
 
-const fetchProjects = async () => {
+// ✅ AÑADIDO: Nueva función para cargar los proyectos
+const fetchProjects = async (isLoadMore = false) => {
   try {
-    loading.value = true
+    if (!isLoadMore) {
+      loading.value = true
+      projects.value = []
+      currentPage.value = 0
+    } else {
+      loadingMore.value = true
+    }
     hasError.value = false
-    projects.value = await projectService.getAllProjects()
+
+    // ✅ CORRECCIÓN: Usar la nueva función de servicio y el conteo
+    const { data, count } = await projectService.getAllProjects(currentPage.value, limit)
+    totalProjects.value = count || 0
+
+    if (isLoadMore) {
+      projects.value = projects.value ? [...projects.value, ...(data || [])] : data
+    } else {
+      projects.value = data
+    }
   } catch (error) {
     hasError.value = true
     projects.value = null
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
+}
+
+// ✅ AÑADIDO: Función para cargar la siguiente página
+const hasMoreProjects = computed(() => {
+  if (!projects.value || totalProjects.value === null) return false
+  return projects.value.length < totalProjects.value
+})
+
+// ✅ AÑADIDO: Función para cargar la siguiente página
+const loadMoreProjects = () => {
+  currentPage.value++
+  fetchProjects(true)
 }
 
 onMounted(() => {
@@ -148,9 +195,9 @@ const handleCreateProject = async () => {
   const result: ModalResult | null = await modal.showModal(CreateProjectModal, {}, {})
   if (result?.action === 'confirm') {
     await fetchProjects()
-    toastStore.addToast({ message: 'Proyecto creado con éxito.', type: 'success' })
+    toast.success('Proyecto creado con éxito.')
   } else if (result?.action === 'cancel') {
-    toastStore.addToast({ message: 'Creación de proyecto cancelada.', type: 'info' })
+    toast.info('Creación de proyecto cancelada.')
   }
 }
 
@@ -160,19 +207,19 @@ const handleEditProject = async (slug: string) => {
       | ProjectWithTechs
       | undefined
     if (!projectToEdit) {
-      toastStore.addToast({ message: 'Proyecto no encontrado.', type: 'error' })
+      toast.error('Proyecto no encontrado.')
       return
     }
     const result = await modal.showModal(ProjectFormModal, { projectData: projectToEdit }, {})
     if (result?.action === 'confirm') {
       await fetchProjects()
-      toastStore.addToast({ message: 'Proyecto actualizado con éxito.', type: 'success' })
+      toast.success('Proyecto actualizado con éxito.')
     } else if (result?.action === 'cancel') {
-      toastStore.addToast({ message: 'Edición de proyecto cancelada.', type: 'info' })
+      toast.info('Edición de proyecto cancelada.')
     }
   } catch (error) {
     console.error('Error en handleEditProject:', error)
-    toastStore.addToast({ message: 'Error al abrir el formulario de edición.', type: 'error' })
+    toast.error('Error al abrir el formulario de edición.')
   }
 }
 
@@ -193,16 +240,11 @@ const handleDeleteProject = async (id: string, title: string) => {
   if (result?.action === 'confirm') {
     try {
       await projectService.deleteProject(id)
+      toast.success('Proyecto eliminado con éxito.')
+      // ✅ CORRECCIÓN: Volvemos a cargar los proyectos desde cero para reflejar la eliminación
       await fetchProjects()
-      toastStore.addToast({
-        message: 'Proyecto eliminado con éxito.',
-        type: 'success',
-      })
     } catch (error) {
-      toastStore.addToast({
-        message: 'Error al eliminar el proyecto. Por favor, revisa tus permisos.',
-        type: 'error',
-      })
+      toast.error('Error al eliminar el proyecto. Por favor, revisa tus permisos.')
     }
   }
 }

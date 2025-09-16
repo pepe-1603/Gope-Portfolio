@@ -13,6 +13,7 @@ import {
 import { MenuItem } from '@headlessui/vue'
 import { EllipsisVerticalIcon } from '@heroicons/vue/20/solid'
 import { useToast } from '@/composables/useToast'
+import UiBadge from '../ui/UiBadge.vue'
 
 library.add(faPen, faTrash, faArrowUpRightFromSquare, faFolderOpen)
 
@@ -57,6 +58,12 @@ const handleMove = () => {
           :class="{ 'text-sm md:text-base': !isGridItem, 'text-lg': isGridItem }"
         >
           {{ project.title }}
+          <UiBadge
+            :color="project.is_published ? 'green' : 'red'"
+            size="xs"
+            pointer
+            :text="project.is_published ? 'público' : 'privado'"
+          />
         </p>
         <p
           class="font-semibold text-sm md:text-base text-gray-900 dark:text-white"
