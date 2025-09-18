@@ -7,6 +7,7 @@ const PROFILES_TABLE = 'user_profiles'
 
 export const profileService = {
   /**
+   * usado praa mostrar el perfil en las visatas publicas aboutView utilizando la varianble de entorno IdAdmin.
    * Obtiene el perfil de un usuario por su ID.
    * @param userId El UUID del usuario.
    * @returns {Promise<Tables<'user_profiles'> | null>}
@@ -35,7 +36,9 @@ export const profileService = {
    * @returns {Promise<Tables<'user_profiles'> | null>}
    */
   getMyProfile: async (): Promise<Tables<'user_profiles'> | null> => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
       console.error('No se encontró un usuario autenticado.')
@@ -85,7 +88,9 @@ export const profileService = {
   updateProfile: async (
     profileData: Tables<'user_profiles'>['Update'],
   ): Promise<Tables<'user_profiles'>> => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
       console.error('No se encontró un usuario autenticado para actualizar el perfil.')

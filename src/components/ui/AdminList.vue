@@ -18,10 +18,8 @@ defineProps<{
     </div>
 
     <div v-else-if="hasError" class="p-4">
-      <UiAlert intent="danger" :dismissible="false">
-        <slot name="error-message">
-          No se pudieron cargar los datos. Por favor, inténtalo de nuevo más tarde.
-        </slot>
+      <UiAlert intent="danger">
+        <p>No se pudieron cargar los datos. Por favor, inténtalo de nuevo más tarde.</p>
       </UiAlert>
     </div>
 

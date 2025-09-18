@@ -69,7 +69,7 @@ type AlertIntent = AlertVariants['intent'] | 'upcoming' | 'new-feature'
 
 const props = defineProps<{
   intent?: AlertIntent
-  title: string
+  title?: string
   dismissible?: boolean
   description?: string
 }>()
