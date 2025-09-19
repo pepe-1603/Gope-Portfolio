@@ -40,7 +40,6 @@
 import { defineComponent } from 'vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiFormField from '@/components/ui/UiFormField.vue'
-import UiTextarea from '@/components/ui/UiTextarea.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { techService } from '@/services/techService'
 import type { ModalResult } from '@/types/modal'
@@ -89,7 +88,6 @@ export default defineComponent({
   components: {
     UiButton,
     UiFormField,
-    UiTextarea,
     UiSpinner,
     FontAwesomeIcon,
   },

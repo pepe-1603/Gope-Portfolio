@@ -9,28 +9,33 @@
         intent="danger"
         title="Error"
         description="No se pudo cargar la información del perfil. Por favor, intenta de nuevo más tarde."
-        :dismissible="false"
       />
     </div>
 
-    <section v-else-if="profile">
+    <section v-else>
+      <AdminProfileForm
+        v-if="isEditing"
+        @updated="handleProfileUpdated"
+        @cancel="handleCancelEdit"
+      />
       <div
+        v-else
         class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8"
       >
         <div class="md:col-span-1 flex flex-col items-center text-center">
           <img
-            :src="profile.avatar || 'https://via.placeholder.com/150'"
+            :src="profile?.avatar || 'https://via.placeholder.com/150'"
             alt="Avatar del usuario"
             class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-blue-500 dark:border-blue-600 transition-transform hover:scale-105"
           />
           <h3 class="mt-4 text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-            {{ profile.name || 'Nombre no definido' }}
+            {{ profile?.name || 'Nombre no definido' }}
           </h3>
           <p class="text-sm sm:text-md text-blue-600 dark:text-blue-400 font-medium mt-1">
-            {{ profile.role }}
+            {{ profile?.role }}
           </p>
           <p class="mt-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            {{ profile.bio || 'Sin biografía.' }}
+            {{ profile?.bio || 'Sin biografía.' }}
           </p>
         </div>
 
@@ -57,25 +62,25 @@
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub</dt>
               <dd class="mt-1 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                <a :href="profile.github_url" target="_blank" class="flex items-center gap-2">
+                <a :href="profile?.github_url" target="_blank" class="flex items-center gap-2">
                   <font-awesome-icon :icon="['fab', 'github']" />
-                  <span>{{ profile.github_url || 'No especificado' }}</span>
+                  <span>{{ profile?.github_url || 'No especificado' }}</span>
                 </a>
               </dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</dt>
               <dd class="mt-1 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                <a :href="profile.linkedin_url" target="_blank" class="flex items-center gap-2">
+                <a :href="profile?.linkedin_url" target="_blank" class="flex items-center gap-2">
                   <font-awesome-icon :icon="['fab', 'linkedin']" />
-                  <span>{{ profile.linkedin_url || 'No especificado' }}</span>
+                  <span>{{ profile?.linkedin_url || 'No especificado' }}</span>
                 </a>
               </dd>
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Curriculum-Vitae</dt>
               <dd class="mt-1 text-sm text-red-600 dark:text-red-400 hover:underline">
-                <a :href="profile.cv_url" target="_blank" class="flex items-center gap-2">
+                <a :href="profile?.cv_url" target="_blank" class="flex items-center gap-2">
                   <font-awesome-icon :icon="['fas', 'file-pdf']" />
                   <span>Ver mi CV</span>
                 </a>
@@ -93,13 +98,13 @@ import { ref, onMounted, computed } from 'vue'
 import { useToast } from '@/composables/useToast'
 import { useAuthStore } from '@/stores/authStore'
 import UiAlert from '@/components/ui/UiAlert.vue'
-import UiSpinner from '@/components/ui/UiSpinner.vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import { faFilePdf, faPen } from '@fortawesome/free-solid-svg-icons'
 import AdminProfileSkeleton from '@/components/ui/skeletons/AdminProfileSkeleton.vue'
+import AdminProfileForm from '@/components/admin/AdminProfileForm.vue'
 
 library.add(faGithub, faLinkedin, faFilePdf, faPen)
 
@@ -107,8 +112,8 @@ const authStore = useAuthStore()
 const toast = useToast()
 const loading = ref(true)
 const hasError = ref(false)
+const isEditing = ref(false)
 
-// ✅ MEJORA: Usa una propiedad computada para mantener el perfil sincronizado
 const profile = computed(() => authStore.profile)
 
 onMounted(async () => {
@@ -126,7 +131,18 @@ onMounted(async () => {
 })
 
 const handleEditProfile = () => {
-  // Esta función se implementará en la próxima tarea
-  toast.upcoming('La funcionalidad de edición se implementará próximamente.')
+  console.log('AdminProfileView: Iniciando modo de edición.')
+  isEditing.value = true
+}
+
+const handleProfileUpdated = () => {
+  console.log('AdminProfileView: Evento @updated recibido. Cerrando formulario.')
+  isEditing.value = false
+  toast.success('Perfil actualizado con éxito.')
+}
+
+const handleCancelEdit = () => {
+  console.log('AdminProfileView: Cancelando edición.')
+  isEditing.value = false
 }
 </script>

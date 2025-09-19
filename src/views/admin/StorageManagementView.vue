@@ -102,6 +102,7 @@ const bucketOptions = [
   { value: import.meta.env.VITE_SUPABASE_PROJECTS_BUCKET, label: 'Proyectos' },
   { value: import.meta.env.VITE_SUPABASE_ICONS_BUCKET, label: 'Íconos de Tecnologías' },
   { value: import.meta.env.VITE_SUPABASE_AVATARS_BUCKET, label: 'Avatares' },
+  { value: import.meta.env.VITE_SUPABASE_CVS_BUCKET, label: 'CVs' },
 ]
 // Estado del componente
 const selectedBucket = ref(bucketOptions[0].value)
