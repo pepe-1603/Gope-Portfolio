@@ -109,9 +109,21 @@ const router = createRouter({
           component: AuthHomeView,
         },
         {
-          path: '/login',
+          path: 'login',
           name: 'login',
           component: () => import('@/views/auth/AdminLoginView.vue'),
+        },
+        //Nueva ruta de cmabio de contaseña.
+        {
+          path: 'update-password',
+          name: 'auth-update-password',
+          component: () => import('@/views/auth/UpdatePasswordView.vue'),
+        },
+        // ✅ NUEVA RUTA: Para la recuperación de contraseña
+        {
+          path: 'forgot-password',
+          name: 'auth-forgot-password',
+          component: () => import('@/views/auth/ForgotPasswordView.vue'),
         },
       ],
     },

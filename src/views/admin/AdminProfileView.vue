@@ -13,6 +13,8 @@
     </div>
 
     <section v-else>
+      <EmailVerificationAlert class="mb-6" />
+
       <AdminProfileForm
         v-if="isEditing"
         @updated="handleProfileUpdated"
@@ -105,6 +107,7 @@ import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons'
 import { faFilePdf, faPen } from '@fortawesome/free-solid-svg-icons'
 import AdminProfileSkeleton from '@/components/ui/skeletons/AdminProfileSkeleton.vue'
 import AdminProfileForm from '@/components/admin/AdminProfileForm.vue'
+import EmailVerificationAlert from '@/components/admin/EmailVerificationAlert.vue'
 
 library.add(faGithub, faLinkedin, faFilePdf, faPen)
 

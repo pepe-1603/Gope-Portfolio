@@ -12,6 +12,13 @@
         title="Error al actualizar"
         :description="formError"
         class="mb-4"
+        dismissible
+      />
+      <UiAlert
+        intent="warning"
+        title="ATENCIÓN:"
+        description="La implementacion de la interfaz para cambiar contraseña NO requiere la contraseña actual.
+                    Solo necesitamos el valor de la nueva contraseña."
       />
 
       <UiFormField
@@ -20,6 +27,7 @@
         type="password"
         v-model="formData.currentPassword"
         :error-message="errors.currentPassword"
+        disabled
       >
         <template #icon>
           <font-awesome-icon :icon="['fas', 'lock']" class="h-4 w-4 text-gray-400" />
@@ -66,8 +74,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive, type PropType } from 'vue'
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue'
 import UiButton from '@/components/ui/UiButton.vue'
 import UiFormField from '@/components/ui/UiFormField.vue'
 import UiAlert from '@/components/ui/UiAlert.vue'
@@ -76,93 +84,103 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { faLock, faKey, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '@/composables/useToast'
 import type { ModalResult } from '@/types/modal'
+import { userService } from '@/services/userService' // Importación correcta
+import { logout } from '@/services/authService' // Importamos el logout para usarlo después de cambiar la contraseña
 
 library.add(faLock, faKey, faSpinner)
 
-const props = defineProps({
-  modalId: { type: Number, required: true },
-  __onConfirm: { type: Function as PropType<(result: ModalResult) => void>, required: true },
-  __onCancel: { type: Function as PropType<(result: ModalResult) => void>, required: true },
-  __onClose: { type: Function as PropType<(result: ModalResult) => void>, required: true },
-})
-
-const toast = useToast()
-const formData = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-})
-
-const errors = reactive({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: '',
-})
-
-const formError = ref('')
-const isLoading = ref(false)
-
-const validateForm = () => {
-  formError.value = ''
-  Object.keys(errors).forEach((key) => (errors[key] = ''))
-  let isValid = true
-
-  if (!formData.currentPassword) {
-    errors.currentPassword = 'La contraseña actual es requerida.'
-    isValid = false
-  }
-  if (!formData.newPassword) {
-    errors.newPassword = 'La nueva contraseña es requerida.'
-    isValid = false
-  } else if (formData.newPassword.length < 8) {
-    errors.newPassword = 'La contraseña debe tener al menos 8 caracteres.'
-    isValid = false
-  }
-  if (formData.newPassword !== formData.confirmPassword) {
-    errors.confirmPassword = 'Las contraseñas no coinciden.'
-    isValid = false
-  }
-  if (formData.newPassword === formData.currentPassword && formData.newPassword) {
-    errors.newPassword = 'La nueva contraseña no puede ser igual a la actual.'
-    isValid = false
-  }
-
-  return isValid
-}
-
-const handleSubmit = async () => {
-  if (!validateForm()) {
-    formError.value = 'Por favor, corrige los errores del formulario.'
-    return
-  }
-
-  isLoading.value = true
-  formError.value = ''
-
-  try {
-    // Simulación de la lógica del backend
-    console.log('Simulando cambio de contraseña...')
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    // Simulación de un error de backend
-    if (formData.currentPassword !== 'correcta') {
-      throw new Error('La contraseña actual es incorrecta.')
+export default defineComponent({
+  name: 'UpdatePasswordModal',
+  components: {
+    UiButton,
+    UiFormField,
+    UiAlert,
+    FontAwesomeIcon,
+  },
+  props: {
+    modalId: { type: Number, required: true },
+    __onConfirm: { type: Function as PropType<(result: ModalResult) => void>, required: true },
+    __onCancel: { type: Function as PropType<(result: ModalResult) => void>, required: true },
+    __onClose: { type: Function as PropType<(result: ModalResult) => void>, required: true },
+  },
+  data() {
+    return {
+      formData: {
+        currentPassword: 'current_password',
+        newPassword: '',
+        confirmPassword: '',
+      },
+      errors: {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      },
+      formError: '',
+      isLoading: false,
     }
+  },
+  methods: {
+    validateForm() {
+      // Misma lógica de validación
+      this.formError = ''
+      Object.keys(this.errors).forEach((key) => (this.errors[key as keyof typeof this.errors] = ''))
+      let isValid = true
 
-    // Si la llamada es exitosa
-    toast.success('Contraseña actualizada con éxito.')
-    props.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
-  } catch (err: any) {
-    const message = err.message || 'Ocurrió un error inesperado al cambiar la contraseña.'
-    toast.error(message)
-    formError.value = message
-    props.__onClose({ action: 'error', payload: null } as ModalResult)
-  } finally {
-    isLoading.value = false
-  }
-}
+      if (!this.formData.currentPassword) {
+        this.errors.currentPassword = 'La contraseña actual es requerida.'
+        isValid = false
+      }
+      if (!this.formData.newPassword) {
+        this.errors.newPassword = 'La nueva contraseña es requerida.'
+        isValid = false
+      } else if (this.formData.newPassword.length < 8) {
+        this.errors.newPassword = 'La contraseña debe tener al menos 8 caracteres.'
+        isValid = false
+      }
+      if (this.formData.newPassword !== this.formData.confirmPassword) {
+        this.errors.confirmPassword = 'Las contraseñas no coinciden.'
+        isValid = false
+      }
+      if (
+        this.formData.newPassword === this.formData.currentPassword &&
+        this.formData.newPassword
+      ) {
+        this.errors.newPassword = 'La nueva contraseña no puede ser igual a la actual.'
+        isValid = false
+      }
 
-const handleCancel = () => {
-  props.__onCancel({ action: 'cancel', payload: null } as ModalResult)
-}
+      return isValid
+    },
+    async handleSubmit() {
+      if (!this.validateForm()) {
+        this.formError = 'Por favor, corrige los errores del formulario.'
+        return
+      }
+
+      this.isLoading = true
+      this.formError = ''
+      const toast = useToast()
+
+      try {
+        // Llama al método del nuevo servicio para cambiar la contraseña
+        await userService.changePassword(this.formData.newPassword)
+
+        // Si la llamada es exitosa, muestra un mensaje y cierra sesión por seguridad
+        toast.success('Contraseña actualizada con éxito.')
+        await logout() // Cierra la sesión
+        this.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
+      } catch (err: any) {
+        const message = err.message || 'Ocurrió un error inesperado al cambiar la contraseña.'
+        toast.error(message)
+        this.formError = message
+        this.__onClose({ action: 'error', payload: null } as ModalResult)
+      } finally {
+        this.isLoading = false
+      }
+    },
+    handleCancel() {
+      this.__onCancel({ action: 'cancel', payload: null } as ModalResult)
+    },
+  },
+})
 </script>

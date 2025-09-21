@@ -162,6 +162,8 @@ import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import { useGlobalModal } from '@/composables/useGlobalModal'
 import ChangePasswordModal from '@/components/ui/modals/ChangePasswordModal.vue'
+import InfoModal from '@/components/ui/modals/InfoModal.vue'
+import { useRouter } from 'vue-router'
 
 library.add(faPalette, faLanguage, faShieldAlt)
 
@@ -169,6 +171,7 @@ const modal = useGlobalModal()
 const themeStore = useThemeStore()
 const { isDarkMode } = storeToRefs(themeStore)
 const toast = useToast()
+const router = useRouter()
 
 const is2faEnabled = ref(false)
 const isPublicProfile = ref(true)
@@ -212,6 +215,17 @@ const openPasswordModal = async () => {
 
   if (result.action === 'confirm') {
     toast.success('La contraseña ha sido actualizada con éxito.')
+    setTimeout(async () => {
+      const result = await modal.showModal(
+        InfoModal,
+        { title: 'Importante', message: 'Necesitas volver a inciar sesion para continuar...' },
+        {},
+      )
+
+      if (result.action === 'confirm' || result.action === 'cancel' || result.action === 'close') {
+        router.push({ name: 'login' })
+      }
+    })
   } else if (result.action === 'cancel') {
     toast.info('Cambio de contraseña cancelado.')
   } else if (result.action === 'close') {
