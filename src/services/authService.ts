@@ -78,9 +78,9 @@ export const start2faSetup = async () => {
 }
 
 // ✅ NUEVO: Verificación de 2FA con un código TOTP para confirmar la configuración.
-export const verify2fa = async (challengeId: string, code: string) => {
+export const verify2fa = async (factorId: string, code: string) => {
   const { data, error } = await supabase.auth.mfa.challengeAndVerify({
-    challengeId,
+    factorId,
     code,
   })
 
@@ -91,11 +91,50 @@ export const verify2fa = async (challengeId: string, code: string) => {
 }
 
 // ✅ NUEVO: Deshabilita 2FA en la cuenta del usuario.
-export const disable2fa = async () => {
-  const { data, error } = await supabase.auth.mfa.unenroll()
+// ✅ MODIFICADO: Ahora la función recibe el factor ID para deshabilitar.
+export const disable2fa = async (factorId: string) => {
+  const { data, error } = await supabase.auth.mfa.unenroll({
+    factorId,
+  })
 
   if (error) {
     throw error
   }
   return data
+}
+
+// ✅ NUEVO: Función para encontrar y eliminar factores 2FA sin nombre (factores huérfanos).
+export const findAndRemoveOrphanedFactors = async (): Promise<void> => {
+  const userResponse = await supabase.auth.getUser()
+  const user = userResponse.data?.user
+
+  if (user && user.factors) {
+    const orphanedFactors = user.factors.filter((factor) => !factor.friendly_name)
+
+    for (const factor of orphanedFactors) {
+      console.log(`Eliminando factor huérfano con ID: ${factor.id}`)
+      await supabase.auth.mfa.unenroll({
+        factorId: factor.id,
+      })
+    }
+  }
+}
+
+// ✅ Desactiva todos los factores de 2FA del usuario actual.
+export const disableAll2faFactors = async () => {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+  if (error) throw error
+
+  if (user?.factors?.length) {
+    for (const factor of user.factors) {
+      try {
+        await supabase.auth.mfa.unenroll({ factorId: factor.id })
+      } catch (err) {
+        console.warn(`No se pudo eliminar el factor ${factor.id}`, err)
+      }
+    }
+  }
 }

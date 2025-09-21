@@ -117,11 +117,42 @@
                   Añade una capa extra de seguridad a tu cuenta.
                 </p>
               </div>
-              <UiSwitch
-                v-model="is2faEnabled"
-                @update:model-value="handle2FAToggle"
-                id="2fa-switch"
-              />
+              <div class="flex items-center gap-2">
+                <span
+                  class="text-sm font-medium"
+                  :class="is2faEnabled ? 'text-green-500' : 'text-gray-500'"
+                >
+                  {{ is2faEnabled ? 'Activado' : 'Desactivado' }}
+                </span>
+                <UiButton
+                  v-if="!is2faEnabled"
+                  type="button"
+                  intent="primary"
+                  size="sm"
+                  @click="handle2FAToggle(true)"
+                  :disabled="isToggling"
+                >
+                  <span v-if="isToggling" class="flex items-center gap-1">
+                    <font-awesome-icon :icon="['fas', 'spinner']" spin />
+                    Cargando...
+                  </span>
+                  <span v-else>Activar</span>
+                </UiButton>
+                <UiButton
+                  v-else
+                  type="button"
+                  intent="danger"
+                  size="sm"
+                  @click="handle2FAToggle(false)"
+                  :disabled="isToggling"
+                >
+                  <span v-if="isToggling" class="flex items-center gap-1">
+                    <font-awesome-icon :icon="['fas', 'spinner']" spin />
+                    Cargando...
+                  </span>
+                  <span v-else>Desactivar</span>
+                </UiButton>
+              </div>
             </div>
 
             <UiDivider class="!my-0" />
@@ -146,8 +177,8 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
+<script setup lang="ts" name="AdminSettingsView">
+import { ref, watch } from 'vue'
 import ThemeSwitch from '@/components/common/ThemeSwitch.vue'
 import UiCard from '@/components/ui/UiCard.vue'
 import UiAlert from '@/components/ui/UiAlert.vue'
@@ -156,59 +187,112 @@ import UiSwitch from '@/components/ui/UiSwitch.vue'
 import UiDivider from '@/components/UiDivider.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPalette, faLanguage, faShieldAlt } from '@fortawesome/free-solid-svg-icons'
+import { faPalette, faLanguage, faShieldAlt, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { useThemeStore } from '@/stores/theme'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import { useGlobalModal } from '@/composables/useGlobalModal'
 import ChangePasswordModal from '@/components/ui/modals/ChangePasswordModal.vue'
 import InfoModal from '@/components/ui/modals/InfoModal.vue'
+import Setup2faModal from '@/components/ui/modals/Setup2faModal.vue'
+import {
+  disable2fa,
+  disableAll2faFactors,
+  findAndRemoveOrphanedFactors,
+} from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 
-library.add(faPalette, faLanguage, faShieldAlt)
+library.add(faPalette, faLanguage, faShieldAlt, faSpinner)
 
 const modal = useGlobalModal()
 const themeStore = useThemeStore()
 const { isDarkMode } = storeToRefs(themeStore)
 const toast = useToast()
 const router = useRouter()
+const authStore = useAuthStore()
 
 const is2faEnabled = ref(false)
 const isPublicProfile = ref(true)
+const isToggling = ref(false)
 
-const handle2FAToggle = (value: boolean) => {
-  if (value) {
-    // Si se activa, muestra un toast de "nueva función"
-    toast.newFeature(
-      'La autenticación de dos factores estará disponible en una próxima actualización. ¡Mantente atento!',
-    )
+watch(
+  () => authStore.user?.factors,
+  (factors) => {
+    is2faEnabled.value = !!factors?.length
+  },
+  { immediate: true },
+)
+
+const handle2FAToggle = async (activate: boolean) => {
+  isToggling.value = true
+  if (activate) {
+    // ✅ PASO 1: Limpiar factores huérfanos antes de continuar.
+    await findAndRemoveOrphanedFactors()
+
+    if (is2faEnabled.value) {
+      toast.info('La autenticación de dos factores ya está habilitada.')
+      isToggling.value = false
+      return
+    }
+
+    const result = await modal.showModal(Setup2faModal, {}, { closeOnClickOutside: false })
+    if (result.action === 'confirm') {
+      await authStore.checkAuth()
+      toast.success('2FA ha sido habilitado con éxito.')
+    } else {
+      is2faEnabled.value = false
+      toast.info('Configuración de 2FA cancelada.')
+    }
   } else {
-    // Si se desactiva, puedes mostrar un toast de "próximamente" o una nota similar
-    toast.upcoming(
-      'Hemos notificado a nuestro equipo sobre tu interés en esta función. ¡Gracias por tu paciencia!',
+    if (!is2faEnabled.value) {
+      toast.info('La autenticación de dos factores ya está deshabilitada.')
+      isToggling.value = false
+      return
+    }
+
+    const confirmResult = await modal.showModal(
+      InfoModal,
+      {
+        title: 'Desactivar 2FA',
+        message: '¿Estás seguro de que quieres deshabilitar la autenticación de dos factores?',
+        intent: 'danger',
+      },
+      { closeOnClickOutside: false },
     )
+    if (confirmResult.action === 'confirm') {
+      try {
+        const factorId = authStore.user?.factors?.[0]?.id
+        if (!factorId) {
+          toast.error('No se encontró el factor 2FA para deshabilitar.')
+          is2faEnabled.value = true
+          isToggling.value = false
+          return
+        }
+        await disableAll2faFactors()
+        await authStore.checkAuth()
+        toast.warning('2FA ha sido deshabilitado de tu cuenta.')
+        toast.success(
+          '2FA ha sido deshabilitado de tu cuenta. Ya no necesitas el código al iniciar sesión.',
+          6000,
+        )
+      } catch (error) {
+        console.error('Error al deshabilitar 2FA:', error)
+        toast.error('Ocurrió un error al deshabilitar 2FA. Por favor, intenta de nuevo.')
+        is2faEnabled.value = true
+      }
+    } else {
+      is2faEnabled.value = true
+    }
   }
+  isToggling.value = false
 }
 
-const handleProfileVisibilityToggle = (value: boolean) => {
-  if (value) {
-    // Si se hace público, muestra un toast de "nueva función"
-    toast.newFeature(
-      '¡Pronto podrás controlar la visibilidad de tu perfil público! Esta función está en desarrollo.',
-    )
-  } else {
-    // Si se hace privado, muestra un toast de "próximamente"
-    toast.upcoming('La configuración de visibilidad del perfil estará disponible próximamente.')
-  }
-}
-
-// ✅ Función para abrir el modal de cambio de contraseña
 const openPasswordModal = async () => {
   const result = await modal.showModal(
     ChangePasswordModal,
     {},
     {
-      // Opcional, si tu modal global usa un título si el modal no tiene uno fijo
       closeOnClickOutside: false,
     },
   )
@@ -216,20 +300,29 @@ const openPasswordModal = async () => {
   if (result.action === 'confirm') {
     toast.success('La contraseña ha sido actualizada con éxito.')
     setTimeout(async () => {
-      const result = await modal.showModal(
+      const modalResult = await modal.showModal(
         InfoModal,
-        { title: 'Importante', message: 'Necesitas volver a inciar sesion para continuar...' },
+        { title: 'Importante', message: 'Necesitas volver a iniciar sesión para continuar...' },
         {},
       )
-
-      if (result.action === 'confirm' || result.action === 'cancel' || result.action === 'close') {
+      if (
+        modalResult.action === 'confirm' ||
+        modalResult.action === 'cancel' ||
+        modalResult.action === 'close'
+      ) {
         router.push({ name: 'login' })
       }
-    })
+    }, 100)
   } else if (result.action === 'cancel') {
     toast.info('Cambio de contraseña cancelado.')
   } else if (result.action === 'close') {
     toast.error('Ocurrió un error al cambiar la contraseña.')
   }
+}
+
+const handleProfileVisibilityToggle = (value: boolean) => {
+  toast.newFeature(
+    `La visibilidad del perfil se ha ${value ? 'habilitado' : 'deshabilitado'}. Esta función es una simulación.`,
+  )
 }
 </script>
