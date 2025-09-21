@@ -11,7 +11,7 @@ export function useToast() {
   /**
    * Muestra un toast genérico.
    * @param message - El mensaje que se mostrará en el toast.
-   * @param type - El tipo de toast ('success', 'error', etc.).
+   * @param type - El tipo de toast ('success', 'error', upcoming, etc.).
    * @param duration - La duración del toast en milisegundos.
    * @param isClosable - Si el usuario puede cerrar el toast manualmente.
    */
