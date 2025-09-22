@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 sm:p-6 space-y-6">
+  <div class="p-6 sm:p-6 space-y-6">
     <h2 class="text-2xl font-bold dark:text-gray-100">Mi Perfil</h2>
 
     <AdminProfileSkeleton v-if="loading" />
