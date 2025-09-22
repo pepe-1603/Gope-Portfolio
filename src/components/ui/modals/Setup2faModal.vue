@@ -7,6 +7,17 @@
       {{ modalDescription }}
     </p>
 
+    <!-- Progreso visual -->
+
+    <UiProgressStep
+      :steps="steps"
+      :currentStep="currentStepIndex"
+      color="blue"
+      class="my-6"
+      animated
+    />
+    <p>progress Actual: <UiBadge color="black" :text="progress" /></p>
+
     <div class="space-y-4">
       <div v-if="progress === 'initial'" class="flex flex-col items-center text-center">
         <font-awesome-icon :icon="['fas', 'qrcode']" class="text-indigo-500 text-5xl mb-4" />
@@ -44,15 +55,30 @@
       </div>
 
       <div v-if="progress === 'verify'">
-        <UiFormField
-          id="2fa-code"
-          label="Código de Verificación (6 dígitos)"
-          placeholder="Ej: 123456"
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2 text-center">
+          Ingresa el código de 6 dígitos generado por tu app de autenticación:
+        </p>
+        <UiCodeInput
+          class="my-4"
           v-model="verificationCode"
-          :error-message="errors.verificationCode"
+          :length="6"
+          type="number"
+          color="blue"
+          size="md"
           :disabled="isVerifying"
-          @keyup.enter="handleVerify"
+          :error="!!errors.verificationCode"
+          :success="inputSuccess"
         />
+
+        <UiAlert
+          v-if="errors.verificationCode"
+          intent="danger"
+          class="my-2"
+          title="Error"
+          :description="errors.verificationCode"
+          dismissible
+        >
+        </UiAlert>
       </div>
 
       <div v-if="progress === 'success'" class="flex flex-col items-center text-center">
@@ -85,7 +111,7 @@
         :disabled="isVerifying || verificationCode.length !== 6"
       >
         <span v-if="isVerifying" class="flex items-center gap-2">
-          <font-awesome-icon :icon="['fas', 'spinner']" spin />
+          <!-- ícono eliminado, solo texto -->
           Verificando...
         </span>
         <span v-else>Confirmar y Habilitar</span>
@@ -98,19 +124,28 @@
 </template>
 
 <script setup lang="ts" name="Setup2faModal">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import UiButton from '@/components/ui/UiButton.vue'
-import UiFormField from '@/components/ui/UiFormField.vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faSpinner, faCheckCircle, faQrcode } from '@fortawesome/free-solid-svg-icons'
+import {
+  faSpinner,
+  faCheckCircle,
+  faQrcode,
+  faKey,
+  faPlay,
+} from '@fortawesome/free-solid-svg-icons'
 import QRCode from 'qrcode'
-import { start2faSetup, verify2fa } from '@/services/authService'
+import { findAndRemoveOrphanedFactors, start2faSetup, verify2fa } from '@/services/authService'
 import { useToast } from '@/composables/useToast'
 import type { ModalResult } from '@/types/modal'
 import { useAuthStore } from '@/stores/authStore'
+import UiProgressStep from '../UiProgressStep.vue'
+import UiCodeInput from '../UiCodeInput.vue'
+import UiAlert from '../UiAlert.vue'
+import UiBadge from '../UiBadge.vue'
 
-library.add(faSpinner, faCheckCircle, faQrcode)
+library.add(faSpinner, faCheckCircle, faQrcode, faPlay, faQrcode, faKey, faCheckCircle)
 
 const props = defineProps<{
   modalId: number
@@ -119,7 +154,16 @@ const props = defineProps<{
   __onClose: (result: ModalResult) => void
 }>()
 
-const progress = ref('initial')
+// Estado de progreso
+const progress = ref<'initial' | 'qr' | 'verify' | 'success'>('initial')
+
+const steps = [
+  { label: 'Inicio', icon: 'play' },
+  { label: 'Escanear', icon: 'qrcode' },
+  { label: 'Verificar', icon: 'key' },
+  { label: 'Completado', icon: 'check-circle' },
+]
+
 const secret = ref('')
 const factorId = ref('')
 const uri = ref('')
@@ -129,10 +173,12 @@ const isLoading = ref(false)
 const errors = ref({
   verificationCode: '',
 })
+const inputSuccess = ref(false)
 
 const qrCodeCanvas = ref<HTMLCanvasElement | null>(null)
 const authStore = useAuthStore()
 const toast = useToast()
+const is2faComplete = ref(false) // ✅ NUEVO: Estado para rastrear si la configuración fue exitosa
 
 const modalTitle = computed(() => {
   // ... (tu lógica de título) ...
@@ -163,6 +209,21 @@ const modalDescription = computed(() => {
       return 'La autenticación de dos factores ha sido activada en tu cuenta exitosamente.'
     default:
       return 'Sigue los pasos para proteger tu cuenta.'
+  }
+})
+
+const currentStepIndex = computed(() => {
+  switch (progress.value) {
+    case 'initial':
+      return 0
+    case 'qr':
+      return 1
+    case 'verify':
+      return 2
+    case 'success':
+      return 3
+    default:
+      return 0
   }
 })
 
@@ -221,12 +282,20 @@ async function handleVerify() {
   isVerifying.value = true
   try {
     await verify2fa(factorId.value, verificationCode.value)
-    progress.value = 'success'
+
+    inputSuccess.value = true
+    setTimeout(() => {
+      progress.value = 'success'
+      inputSuccess.value = false
+      is2faComplete.value = true
+    }, 800)
+
     toast.success('¡2FA ha sido habilitado con éxito!')
   } catch (error) {
-    console.error('Error al verificar 2FA:', error)
     errors.value.verificationCode = 'Código de verificación incorrecto. Inténtalo de nuevo.'
     toast.error('Código de verificación incorrecto.')
+
+    verificationCode.value = ''
   } finally {
     isVerifying.value = false
   }
@@ -236,10 +305,16 @@ function handleConfirm() {
   props.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
 }
 
-function handleCancel() {
+async function handleCancel() {
+  await findAndRemoveOrphanedFactors() // ✅ MODIFICADO: Llamar a la función de limpieza
   props.__onCancel({ action: 'cancel', payload: null } as ModalResult)
 }
-
+// ✅ NUEVO: onUnmounted para limpiar el factor si el modal se cierra inesperadamente
+onUnmounted(async () => {
+  if (!is2faComplete.value && factorId.value) {
+    await findAndRemoveOrphanedFactors()
+  }
+})
 onMounted(() => {
   if (authStore.user?.factors?.length > 0) {
     toast.info('La autenticación de dos factores ya está habilitada para tu cuenta.')

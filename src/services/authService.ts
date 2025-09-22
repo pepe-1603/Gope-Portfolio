@@ -138,3 +138,9 @@ export const disableAll2faFactors = async () => {
     }
   }
 }
+
+//ajustar  para supabase
+export async function delete2faFactor(factorId: string): Promise<void> {
+  const { error } = await supabase.auth.admin.deleteUserFactor(factorId)
+  if (error) throw error
+}

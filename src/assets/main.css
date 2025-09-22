@@ -1,6 +1,6 @@
 /* src/assets/main.css */
 @import './base.css'; /* este archivo importa las utilidades de tailwind*/
-
+@import 'css/animations.css';
 /* Estilos base para el modo claro */
 body {
   @apply bg-background-light text-text-light transition-colors duration-500 ease-in-out;

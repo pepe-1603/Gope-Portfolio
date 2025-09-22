@@ -195,11 +195,7 @@ import { useGlobalModal } from '@/composables/useGlobalModal'
 import ChangePasswordModal from '@/components/ui/modals/ChangePasswordModal.vue'
 import InfoModal from '@/components/ui/modals/InfoModal.vue'
 import Setup2faModal from '@/components/ui/modals/Setup2faModal.vue'
-import {
-  disable2fa,
-  disableAll2faFactors,
-  findAndRemoveOrphanedFactors,
-} from '@/services/authService'
+import { disableAll2faFactors, findAndRemoveOrphanedFactors } from '@/services/authService'
 import { useAuthStore } from '@/stores/authStore'
 import { useRouter } from 'vue-router'
 
@@ -281,7 +277,7 @@ const handle2FAToggle = async (activate: boolean) => {
         toast.error('Ocurrió un error al deshabilitar 2FA. Por favor, intenta de nuevo.')
         is2faEnabled.value = true
       }
-    } else {
+    } else if (confirmResult.action === 'cancel' || confirmResult.action === 'close') {
       is2faEnabled.value = true
     }
   }

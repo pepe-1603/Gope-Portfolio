@@ -54,7 +54,7 @@ const handleDialogClose = () => {
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
-        <div class="fixed inset-0 transition-opacity" />
+        <div class="fixed inset-0 bg-gray-500/75 transition-opacity backdrop-blur-sm" />
       </TransitionChild>
 
       <div class="fixed inset-0 overflow-y-auto">
