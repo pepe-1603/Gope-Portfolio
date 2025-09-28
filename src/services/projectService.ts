@@ -64,7 +64,7 @@ export const projectService = {
       // ✅ CAMBIO: Usamos `select` con `count: 'exact'` y `range`
       const { data, count, error } = await supabase
         .from(PROJECTS_TABLE)
-        .select('*', { count: 'exact' })
+        .select('* , project_techs(techs(*))', { count: 'exact' })
         .eq('is_published', true)
         .order('created_at', { ascending: false })
         .range(start, end)

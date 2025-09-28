@@ -57,9 +57,9 @@ import ProjectCardSkeleton from '@/components/ui/skeletons/ProjectCardSkeleton.v
 import InfiniteScrollSentinel from '@/components/common/InfiniteScrollSentinel.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { faFaceFrown } from '@fortawesome/free-solid-svg-icons'
-import type { Tables } from '@/types/supabase'
+import type { ProjectWithTechs } from '@/types/project'
 
-const projects = ref<Tables<'projects'>[] | null>([])
+const projects = ref<ProjectWithTechs[] | null>([])
 const isLoadingInitial = ref(true)
 const isLoadingMore = ref(false)
 const error = ref<string | null>(null)
@@ -85,7 +85,11 @@ const fetchProjects = async (isLoadMore = false) => {
   try {
     const { data, count } = await projectService.getPaginatedProjects(page.value, projectsPerPage)
     if (data) {
-      projects.value = [...(projects.value || []), ...data]
+      const projectsWithTechs: ProjectWithTechs[] = data.map((project: any) => ({
+        ...project,
+        project_techs: project.project_techs || [],
+      }))
+      projects.value = [...(projects.value || []), ...projectsWithTechs]
     }
     totalProjectsCount.value = count || 0
   } catch (err: any) {

@@ -2,6 +2,13 @@
   <div class="p-6 sm:p-6 space-y-6">
     <h2 class="text-2xl font-bold dark:text-gray-100">Mi Perfil</h2>
 
+    <UiAlert
+      intent="info"
+      title="Perfil Público"
+      description="Esta información es la que se mostrará en tu portafolio web principal, visible para entrevistadores y público general."
+      class="mt-4"
+    />
+
     <AdminProfileSkeleton v-if="loading" />
 
     <div v-else-if="hasError" class="mt-8">

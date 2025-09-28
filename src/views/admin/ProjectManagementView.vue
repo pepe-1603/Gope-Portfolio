@@ -104,6 +104,7 @@ import type { ProjectWithTechs } from '@/types/project'
 import { useToast } from '@/composables/useToast'
 import UiAlert from '@/components/ui/UiAlert.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
+import { useUiStore } from '@/stores/uiStore'
 
 library.add(faList, faGrip, faArrowDownAZ, faArrowUpAZ, faPlus)
 
@@ -120,17 +121,20 @@ const currentPage = ref(0)
 const limit = 10 // O el número de elementos que desees por página
 const totalProjects = ref(0)
 const loadingMore = ref(false)
+// ✅ UTILIZAR EL STORE
+const uiStore = useUiStore()
 
 // ✅ NUEVAS VARIABLES DE ESTADO
-const isGridView = ref(false)
-const isAscending = ref(true)
+const isGridView = computed(() => uiStore.isGridView)
+// ✅ COMPUTADA/ESTADO DEL STORE para el orden
+const isAscending = computed(() => uiStore.isAscending) // ✅ LEE DEL STORE
 
 const toggleViewMode = () => {
-  isGridView.value = !isGridView.value
+  uiStore.toggleGridView()
 }
 
 const toggleSortOrder = () => {
-  isAscending.value = !isAscending.value
+  uiStore.toggleSortOrder()
 }
 
 // ✅ COMPUTADA PARA ORDENAR LOS DATOS

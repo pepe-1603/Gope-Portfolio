@@ -32,6 +32,13 @@
       empty-message="No hay tecnologías para mostrar."
       :is-grid="isGridView"
     >
+      <template #error-message>
+        <UiAlert
+          intent="danger"
+          title="Error"
+          description="Ocurrio un erro al obtener las tecnologias.  Por favor, inténtalo de nuevo más tarde."
+        />
+      </template>
       <template #loading>
         <SkeletonListTechs v-if="!isGridView" />
         <div v-else>Cargando vista de mosaico...</div>
@@ -92,6 +99,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import type { Tables } from '@/types/supabase'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
+import UiAlert from '@/components/ui/UiAlert.vue'
+import { useUiStore } from '@/stores/uiStore'
 
 library.add(faList, faGrip, faArrowDownAZ, faArrowUpAZ, faPlus)
 
@@ -108,15 +117,24 @@ const limit = 10
 const totalTechs = ref(0)
 
 // ✅ NUEVAS VARIABLES DE ESTADO
-const isGridView = ref(false)
-const isAscending = ref(true)
+// ✅ UTILIZAR EL STORE
+const uiStore = useUiStore()
+
+// ✅ COMPUTADA/ESTADO DEL STORE
+// Usamos el estado del store directamente, que ahora es persistente.
+// Para usarlo en el template y la lógica:
+const isGridView = computed(() => uiStore.isGridView)
+// ✅ COMPUTADA/ESTADO DEL STORE para el orden
+const isAscending = computed(() => uiStore.isAscending) // ✅ LEE DEL STORE
 
 const toggleViewMode = () => {
-  isGridView.value = !isGridView.value
+  // 🛑 CAMBIO: Llamamos a la acción del store en lugar de modificar un ref local
+  uiStore.toggleGridView()
 }
 
 const toggleSortOrder = () => {
-  isAscending.value = !isAscending.value
+  // 🛑 CAMBIO: Llama a la acción del store para alternar el estado persistido
+  uiStore.toggleSortOrder()
 }
 
 // ✅ COMPUTADA PARA ORDENAR LOS DATOS

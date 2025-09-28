@@ -11,6 +11,7 @@ import ConfirmDeleteModal from '@/components/ui/modals/ConfirmDeleteModal.vue'
 import type { Tables } from '@/types/supabase'
 import CreateExperienceModal from '@/components/ui/modals/CreateExperienceModal.vue'
 import ExperienceFormModal from '@/components/ui/modals/ExperienceFormModal.vue'
+import UiAlert from '@/components/ui/UiAlert.vue'
 
 const modal = useGlobalModal()
 const toastStore = useToastStore()
@@ -108,6 +109,12 @@ onMounted(() => {
       :has-error="hasError"
       empty-message="No hay experiencia para mostrar."
     >
+      <template #error-message>
+        <UiAlert
+          title="Error"
+          description="No se pudo cargar las de experiencias.  Por favor, inténtalo de nuevo más tarde."
+        />
+      </template>
       <template #loading>
         <SkeletonListExperience />
       </template>

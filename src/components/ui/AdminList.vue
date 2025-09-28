@@ -1,6 +1,4 @@
 <script setup lang="ts" generic="T">
-import UiAlert from './UiAlert.vue'
-
 defineProps<{
   items: T[] | null
   loading: boolean
@@ -18,9 +16,7 @@ defineProps<{
     </div>
 
     <div v-else-if="hasError" class="p-4">
-      <UiAlert intent="danger">
-        <p>No se pudieron cargar los datos. Por favor, inténtalo de nuevo más tarde.</p>
-      </UiAlert>
+      <slot name="error-message"> </slot>
     </div>
 
     <div

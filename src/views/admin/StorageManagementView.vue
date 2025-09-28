@@ -26,12 +26,19 @@
 
     <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 min-h-[50vh]">
       <div v-if="loading" class="text-center text-gray-500 dark:text-gray-400 py-10">
-        <UiSpinner class="mx-auto w-8 h-8" />
-        <p class="mt-2">Cargando archivos...</p>
+        <FileGridSkeleton :count="10" />
       </div>
-      <UiAlert v-else-if="hasError" type="error" class="py-10">
-        <p class="text-center font-bold">Error al cargar los archivos.</p>
-      </UiAlert>
+
+      <div v-else-if="hasError">
+        <UiAlert
+          intent="danger"
+          title="Error"
+          description="No se pudo cargar laos archivos del bucket.  Por favor, inténtalo de nuevo más tarde. "
+          dismissible
+        >
+          <p @click="fetchFiles" class="underline hover:cursor-pointer">Reintentar</p>
+        </UiAlert>
+      </div>
       <div v-else-if="!files.length" class="text-center text-gray-500 dark:text-gray-400 py-10">
         No hay archivos en este bucket.
       </div>
@@ -93,6 +100,8 @@ import { useGlobalModal } from '@/composables/useGlobalModal'
 import ConfirmDeleteModal from '@/components/ui/modals/ConfirmDeleteModal.vue'
 import supabase from '@/lib/supabaseClient'
 import UiAlert from '@/components/ui/UiAlert.vue'
+import FileCardSkeleton from '@/components/ui/skeletons/FileCardSkeleton.vue'
+import FileGridSkeleton from '@/components/ui/skeletons/FileGridSkeleton.vue'
 
 library.add(faCopy, faTrash, faFile, faFolderOpen, faSpinner)
 
