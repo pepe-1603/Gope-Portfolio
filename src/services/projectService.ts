@@ -3,6 +3,7 @@
 import supabase from '@/lib/supabaseClient'
 import type { Tables } from '@/types/supabase'
 import type { ProjectWithTechs } from '@/types/project'
+import { activityService } from './activityService'
 
 const PROJECTS_TABLE = 'projects'
 
@@ -144,6 +145,7 @@ export const projectService = {
    */
   createProject: async (projectData: Tables<'projects'>['Insert']): Promise<Tables<'projects'>> => {
     try {
+      // 1. Ejecutar la operación principal (crear el proyecto)
       const { data, error } = await supabase
         .from(PROJECTS_TABLE)
         .insert(projectData)
@@ -153,6 +155,14 @@ export const projectService = {
         console.error('Error creating project:', error.message)
         throw error
       }
+      // 2. Ejecutar el Log de Actividad (SOLO si la operación fue exitosa)
+      await activityService.logActivity(
+        'CREATE', // Acción
+        'project', // Tipo de Recurso
+        `Proyecto '${projectData.title}' creado exitosamente.`, // Descripción
+        projectData.id, // ID del Recurso creado
+      )
+
       return data
     } catch (error) {
       console.error('Error in createProject:', error)
@@ -191,6 +201,15 @@ export const projectService = {
         notFoundError.code = 'PGRST116'
         throw notFoundError
       }
+
+      // ✅ INTEGRACIÓN DEL LOG: Registrar la actualización
+      await activityService.logActivity(
+        'UPDATE',
+        'project',
+        `Proyecto '${projectData.title || id}' actualizado.`,
+        projectData.id,
+      )
+
       console.log('Proyecto actualizado con éxito:', data)
       return data
     } catch (error) {
@@ -296,11 +315,16 @@ export const projectService = {
    */
   deleteProject: async (id: string): Promise<void> => {
     try {
+      // Opcional: Obtener el título antes de eliminar para un log más descriptivo
+      const projectToDelete = await projectService.getProjectById(id)
+      const title = projectToDelete?.title || `ID: ${id}`
       const { error, status } = await supabase.from(PROJECTS_TABLE).delete().eq('id', id)
       if (error) {
         console.error('Error deleting project:', error.message)
         throw error
       }
+      // ✅ INTEGRACIÓN DEL LOG: Registrar la eliminación
+      await activityService.logActivity('DELETE', 'project', `Proyecto '${title}' eliminado.`, id)
       console.log(status, 'proyecto eliminado con id : ', id)
     } catch (error) {
       console.error('Error in deleteProject:', error)
