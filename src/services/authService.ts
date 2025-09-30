@@ -158,8 +158,9 @@ export const disableAll2faFactors = async () => {
   }
 }
 
-//ajustar  para supabase
+//(Usando la función de cliente unenroll, la que debes usar)
 export async function delete2faFactor(factorId: string): Promise<void> {
-  const { error } = await supabase.auth.admin.deleteUserFactor(factorId)
+  // Nota: unenroll es la forma correcta de eliminar un factor desde el cliente.
+  const { error } = await supabase.auth.mfa.unenroll({ factorId })
   if (error) throw error
 }
