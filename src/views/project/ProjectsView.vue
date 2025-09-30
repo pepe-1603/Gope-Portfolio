@@ -14,7 +14,7 @@
         :description="error"
         dismissible
       >
-        <span @click="fetchProjects" class="underline hover:cursor-pointer">Reintentar</span>
+        <span @click="fetchProjects()" class="underline hover:cursor-pointer">Reintentar</span>
       </UiAlert>
     </div>
 

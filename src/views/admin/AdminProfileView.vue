@@ -71,7 +71,11 @@
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">GitHub</dt>
               <dd class="mt-1 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                <a :href="profile?.github_url" target="_blank" class="flex items-center gap-2">
+                <a
+                  :href="profile?.github_url || ''"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                >
                   <font-awesome-icon :icon="['fab', 'github']" />
                   <span>{{ profile?.github_url || 'No especificado' }}</span>
                 </a>
@@ -80,7 +84,11 @@
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">LinkedIn</dt>
               <dd class="mt-1 text-sm text-blue-600 dark:text-blue-400 hover:underline">
-                <a :href="profile?.linkedin_url" target="_blank" class="flex items-center gap-2">
+                <a
+                  :href="profile?.linkedin_url || ''"
+                  target="_blank"
+                  class="flex items-center gap-2"
+                >
                   <font-awesome-icon :icon="['fab', 'linkedin']" />
                   <span>{{ profile?.linkedin_url || 'No especificado' }}</span>
                 </a>
@@ -89,7 +97,7 @@
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Curriculum-Vitae</dt>
               <dd class="mt-1 text-sm text-red-600 dark:text-red-400 hover:underline">
-                <a :href="profile?.cv_url" target="_blank" class="flex items-center gap-2">
+                <a :href="profile?.cv_url || ''" target="_blank" class="flex items-center gap-2">
                   <font-awesome-icon :icon="['fas', 'file-pdf']" />
                   <span>Ver mi CV</span>
                 </a>

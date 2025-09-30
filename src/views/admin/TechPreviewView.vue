@@ -84,7 +84,7 @@ onMounted(async () => {
               >{{ tech.icon_url }}</a
             >
           </p>
-          <p v-if="tech.created_at" class="flex items-center gap-2">
+          <!-- <p v-if="tech.created_at" class="flex items-center gap-2">
             <font-awesome-icon icon="fa-solid fa-calendar-plus" class="text-green-500" />
             <strong class="font-medium text-gray-800 dark:text-gray-100">Creado en:</strong>
             {{ new Date(tech.created_at).toLocaleDateString() }}
@@ -95,7 +95,7 @@ onMounted(async () => {
               >Última actualización:</strong
             >
             {{ new Date(tech.updated_at).toLocaleDateString() }}
-          </p>
+          </p> -->
         </div>
       </div>
     </section>
