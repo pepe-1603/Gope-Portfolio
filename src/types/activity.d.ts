@@ -8,6 +8,7 @@ export type ActivityResourceType =
   | 'profile'
   | 'storage'
   | 'auth'
+  | 'user'
 
 export interface AdminActivity {
   id: string

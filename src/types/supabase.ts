@@ -5,10 +5,23 @@
  * Se puede generar automáticamente con `supabase gen types`, pero para este
  * ejercicio, lo creamos manualmente basándonos en tu esquema.
  */
-import { User } from '@supabase/supabase-js'
+import type { User } from '@supabase/supabase-js' // ✅ CORRECCIÓN 1: Usar 'import type' (TS1484)
 
+// ----------------------------------------------------------------------
+// TIPOS DE UTILITY CRÍTICOS PARA INSERT/UPDATE
+// ----------------------------------------------------------------------
+
+// Tipo para la SELECCIÓN de datos (Rows)
 export type Tables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row']
+
+// ✅ CORRECCIÓN 2: Tipo para INSERT
+export type TablesInsert<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Insert']
+
+// ✅ CORRECCIÓN 3: Tipo para UPDATE
+export type TablesUpdate<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Update']
 
 export interface Database {
   public: {
