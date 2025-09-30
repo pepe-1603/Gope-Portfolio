@@ -8,4 +8,7 @@
 [[headers]]
   for = "/*"
   [headers.values]
+ main
     Content-Type = "application/javascript"
+    Content-Type = "application/javascript"
+    main
