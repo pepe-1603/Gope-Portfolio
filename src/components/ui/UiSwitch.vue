@@ -1,3 +1,4 @@
+<!--src/components/ui/UiSwitch.vue-->
 <template>
   <div class="flex items-center space-x-2">
     <label

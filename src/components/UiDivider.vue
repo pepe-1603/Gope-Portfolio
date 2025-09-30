@@ -1,10 +1,15 @@
+<!--src/components/ui/UiDivider.vue-->
 <template>
   <div class="relative flex items-center w-full my-4">
     <!-- LÃ­nea del divisor -->
     <div class="flex-grow border-t border-gray-300 dark:border-gray-600"></div>
 
     <!-- Contenedor para el icono o etiqueta -->
-    <div v-if="label" class="mx-4 text-sm font-medium text-gray-600 dark:text-gray-300">
+    <div
+      v-if="label"
+      class="mx-4 font-medium text-gray-600 dark:text-gray-300"
+      :class="[size === 'sm' ? 'text-sm' : 'text-xl']"
+    >
       {{ label }}
     </div>
 

@@ -20,11 +20,32 @@
       <div
         class="w-12 h-12 border-4 rounded-full animate-spin border-indigo-500 border-t-transparent"
       ></div>
-      <p class="mt-4 text-gray-500 font-semibold">Cargando App inicial ...</p>
     </div>
 
     <div id="app" class="hidden"></div>
 
+    <script>
+      // Esperar a que el DOM esté listo y luego mostrar la app y ocultar el loader.
+      // Usar el evento 'DOMContentLoaded' es una opción más rápida que 'load' si solo necesitas
+      // saber que el DOM ya está listo, ya que no espera por las imágenes y otros recursos.
+      const loader = document.getElementById('loader')
+      const appElement = document.getElementById('app')
+
+      window.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          if (loader) {
+            loader.classList.add('hidden')
+          }
+
+          if (appElement) {
+            //appElement.style.display = 'block'; // O remueve la clase de ocultar de Tailwind
+            appElement.classList.remove('hidden')
+          }
+        },
+        { once: true },
+      ) // Usar 'once: true' asegura que el evento se ejecute solo una vez
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

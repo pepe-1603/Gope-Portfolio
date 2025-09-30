@@ -1,3 +1,7 @@
+#no bur archivos
+.gitignore
+credentials-google-b180022.txt
+
 # Logs
 logs
 *.log

@@ -6,7 +6,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { buttonStyles, type ButtonVariants } from '../../utils/buttonStyles'
+import { buttonStyles, type ButtonVariants } from '@/utils/buttonStyles'
 
 const props = defineProps<{
   intent?: ButtonVariants['intent']

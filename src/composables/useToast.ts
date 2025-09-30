@@ -1,3 +1,4 @@
+//src/composables/useToast.ts
 import { useToastStore, type Toast } from '@/stores/toast'
 
 /**
@@ -10,7 +11,7 @@ export function useToast() {
   /**
    * Muestra un toast genérico.
    * @param message - El mensaje que se mostrará en el toast.
-   * @param type - El tipo de toast ('success', 'error', etc.).
+   * @param type - El tipo de toast ('success', 'error', upcoming, etc.).
    * @param duration - La duración del toast en milisegundos.
    * @param isClosable - Si el usuario puede cerrar el toast manualmente.
    */
@@ -47,11 +48,23 @@ export function useToast() {
     showToast(message, 'warning', duration)
   }
 
+  // ✅ Añade los nuevos métodos de conveniencia
+  const upcoming = (message: string, duration?: number) => {
+    showToast(message, 'upcoming', duration)
+  }
+
+  const newFeature = (message: string, duration?: number) => {
+    showToast(message, 'new-feature', duration)
+  }
+
   return {
     showToast,
     success,
     error,
     info,
     warning,
+    // ✅ Exporta los nuevos métodos
+    upcoming,
+    newFeature,
   }
 }

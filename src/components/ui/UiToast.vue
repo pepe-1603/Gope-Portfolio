@@ -36,20 +36,22 @@ import {
   faCircleXmark,
   faCircleInfo,
   faTriangleExclamation,
+  faRocket,
+  faLightbulb, // ✅ faRocket ya está importado
 } from '@fortawesome/free-solid-svg-icons'
-import { type Toast } from '@/stores/toast'
+import { type Toast } from '@/stores/toast' // ✅ Importa el tipo Toast
 import { toastStyles, type ToastVariants } from '@/utils/toastStyles'
 
-// 1. Se cambió el props para recibir un objeto 'toast' completo
 const props = defineProps<{
+  // ✅ La prop 'intent' no es necesaria si ya pasas el objeto 'toast'
+  //    Lo que te pasaste fue `intent?: toast: Toast`, lo ajustaremos a:
   toast: Toast
 }>()
 
 // 2. Definimos los eventos que el componente puede emitir
 const emit = defineEmits(['close'])
 
-// 3. Se elimina la lógica de visibilidad y setTimeout, ahora la gestiona ToastContainer
-// 4. Se usa la propiedad 'type' del objeto toast para los íconos y estilos
+// 3. Se usa la propiedad 'type' del objeto toast para los íconos y estilos
 const iconForIntent = computed(() => {
   switch (props.toast.type) {
     case 'success':
@@ -60,12 +62,18 @@ const iconForIntent = computed(() => {
       return faCircleInfo
     case 'warning':
       return faTriangleExclamation
+    // ✅ Añade el nuevo caso para 'new-feature' y 'upcoming'
+    case 'new-feature':
+      return faRocket
+    case 'upcoming':
+      return faLightbulb // Usamos el mismo ícono para ambas variantes
     default:
       return faCircleInfo
   }
 })
 
 const styles = computed(() => {
+  // ✅ Se asegura que el tipo de intent sea el correcto para CVA
   return toastStyles({
     intent: props.toast.type as ToastVariants['intent'],
   })

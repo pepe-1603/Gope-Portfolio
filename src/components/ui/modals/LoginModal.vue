@@ -1,61 +1,52 @@
 <template>
-  <div>
-    <h2 class="text-2xl font-bold mb-4">Iniciar Sesión</h2>
-    <p class="text-gray-600 dark:text-gray-400 mb-6">
-      Ingresa tus credenciales para acceder a tu cuenta.
-    </p>
-
-    <form @submit.prevent="handleLogin">
-      <div class="mb-4">
-        <label for="email" class="block text-gray-700 dark:text-gray-300">Correo electrónico</label>
-        <input type="email" id="email" class="w-full mt-1 p-2 border rounded-md" />
-      </div>
-      <div class="mb-6">
-        <label for="password" class="block text-gray-700 dark:text-gray-300">Contraseña</label>
-        <input type="password" id="password" class="w-full mt-1 p-2 border rounded-md" />
-      </div>
-      <div class="flex justify-end">
-        <button
-          type="button"
-          @click="close"
-          class="mr-2 px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-        >
-          Cancelar
-        </button>
-        <button type="submit" class="px-4 py-2 rounded-md bg-blue-500 text-white">Acceder</button>
-      </div>
+  <div class="w-full max-w-md bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 space-y-6">
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Acceso de Administrador</h2>
+    </div>
+    <form @submit.prevent="handleLogin" class="space-y-4">
+      <button type="submit">Iniciar Sesión</button>
     </form>
+    <button @click="handleCancel">Cancelar</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, toRefs } from 'vue'
-import { useModal } from '@/composables/useModal'
+import { defineComponent, ref } from 'vue';
+import type { ModalResult } from '@/types/modal.d.ts';
 
 export default defineComponent({
   name: 'LoginModal',
+  // Props inyectadas por el ModalService
   props: {
-    // Aquí puedes recibir las props que le pases al abrir el modal
-    initialEmail: {
-      type: String,
-      default: '',
-    },
+    modalId: { type: Number, required: true },
+    __onConfirm: { type: Function, required: true },
+    __onCancel: { type: Function, required: true },
+    __onClose: { type: Function, required: true },
   },
   setup(props) {
-    // Importamos el composable para tener acceso a la función de cierre
-    const { close } = useModal()
+    const email = ref('');
+    const password = ref('');
+    const errors = ref({ email: '', password: '' });
 
-    const handleLogin = () => {
-      // Lógica para iniciar sesión
+    const handleLogin = async () => {
+      // Lógica de autenticación
       // ...
-      // Después de la lógica, cierra el modal
-      close()
-    }
+      // Al finalizar, llama a la prop __onConfirm o __onCancel
+      props.__onConfirm({ success: true } as ModalResult['payload']);
+    };
+
+    const handleCancel = () => {
+      // Llama a la prop __onCancel al cancelar
+      props.__onCancel({ canceled: true } as ModalResult['payload']);
+    };
 
     return {
+      email,
+      password,
+      errors,
       handleLogin,
-      close,
-    }
+      handleCancel,
+    };
   },
-})
+});
 </script>

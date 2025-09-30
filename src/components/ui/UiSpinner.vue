@@ -1,8 +1,8 @@
 <!-- components/ui/UiSpinner.vue -->
 <template>
-  <div class="flex flex-col items-center justify-center text-center">
+  <div class="flex items-center gap-2 justify-center text-center">
     <svg
-      class="animate-spin h-5 w-5 text-gray-500 dark:text-gray-300 mb-2"
+      class="animate-spin h-5 w-5 text-gray-200 dark:text-gray-400 mb-2"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -14,7 +14,7 @@
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
       />
     </svg>
-    <span class="text-sm text-gray-600 dark:text-gray-400">{{ message }}</span>
+    <span class="text-sm text-gray-200 dark:text-gray-400">{{ message }}</span>
   </div>
 </template>
 

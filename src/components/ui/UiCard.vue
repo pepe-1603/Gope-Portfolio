@@ -1,20 +1,30 @@
 <template>
-  <div class="rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800 dark:text-gray-200">
-    <div v-if="$slots.header" class="mb-4">
+  <div
+    class="rounded-lg dark:text-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+    :class="props.fullWidth ? 'w-full' : 'w-fit'"
+  >
+    <div v-if="$slots.header" class="p-6 pb-0">
       <slot name="header"></slot>
     </div>
 
-    <div>
+    <div class="p-6">
       <slot></slot>
     </div>
 
-    <div v-if="$slots.footer" class="mt-6 flex justify-end gap-2">
+    <div v-if="$slots.footer" class="p-6 pt-0 flex justify-end gap-2">
       <slot name="footer"></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// El componente UiCard no necesita props, es estructural.
-// Solo usa slots para acomodar el contenido.
+// No se necesitan cambios aquí.
+const props = withDefaults(
+  defineProps<{
+    fullWidth?: boolean
+  }>(),
+  {
+    fullWidth: false,
+  },
+)
 </script>
