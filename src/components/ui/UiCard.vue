@@ -1,6 +1,6 @@
 <template>
   <div
-    class="rounded-lg bg-white dark:bg-gray-800 dark:text-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+    class="rounded-lg dark:text-gray-200 shadow-md overflow-hidden hover:shadow-lg transition-shadow"
     :class="props.fullWidth ? 'w-full' : 'w-fit'"
   >
     <div v-if="$slots.header" class="p-6 pb-0">

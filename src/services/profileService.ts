@@ -2,6 +2,7 @@
 
 import supabase from '@/lib/supabaseClient'
 import type { Tables } from '@/types/supabase'
+import { activityService } from './activityService'
 
 const PROFILES_TABLE = 'user_profiles'
 
@@ -77,6 +78,13 @@ export const profileService = {
       console.error('Error al crear perfil:', error.message)
       throw error
     }
+    // ✅ LOG DE ACTIVIDAD: Creación (normalmente se usa en el proceso de registro)
+    await activityService.logActivity(
+      'CREATE',
+      'profile', // Tipo de Recurso
+      `Perfil de usuario ${profileData.full_name || data[0].id} creado.`, // Descripción
+      data[0].user_id,
+    )
     return data[0]
   },
 
@@ -107,6 +115,14 @@ export const profileService = {
       console.error('Error al actualizar el perfil:', error.message)
       throw error
     }
+    // ✅ LOG DE ACTIVIDAD: Actualización
+    const profileName = data[0].name || data[0].id
+    await activityService.logActivity(
+      'UPDATE',
+      'profile', // Tipo de Recurso
+      `Perfil de usuario ${profileName} actualizado.`, // Descripción
+      user.id,
+    )
     return data[0]
   },
 
@@ -123,5 +139,12 @@ export const profileService = {
       console.error('Error al eliminar perfil:', error.message)
       throw error
     }
+    // ✅ LOG DE ACTIVIDAD: Eliminación
+    await activityService.logActivity(
+      'DELETE',
+      'profile', // Tipo de Recurso
+      `Perfil de usuario con ID ${userId} eliminado.`, // Descripción
+      userId,
+    )
   },
 }

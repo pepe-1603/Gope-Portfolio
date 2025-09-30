@@ -19,6 +19,29 @@ export interface PaginatedResponse<T> {
  */
 export const projectService = {
   /**
+   * Obtiene una lista de todos los proyectos sin paginación.
+   * @returns {Promise<Tables<'projects'>[] | null>} Una promesa que resuelve con un array de proyectos o null.
+   */
+  getAllProjectsWithoutPagination: async (): Promise<Tables<'projects'>[] | null> => {
+    try {
+      const { data, error } = await supabase
+        .from(PROJECTS_TABLE)
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching all projects:', error.message)
+        throw error
+      }
+
+      return data
+    } catch (error) {
+      console.error('Error in getAllProjects:', error)
+      throw error
+    }
+  },
+
+  /**
    * Obtiene una lista de todos los proyectos.
    * @returns {Promise<Tables<'projects'>[] | null>} Una promesa que resuelve con un array de proyectos o null.
    */
@@ -189,6 +212,13 @@ export const projectService = {
         .single() // <--- Usa .single() para obtener un solo resultado
 
       console.log('data service:', data)
+      // ✅ LOG DE ACTIVIDAD: Creación
+      await activityService.logActivity(
+        'UPDATE',
+        'project', // Tipo de Recurso
+        `Projecto '${projectData.title}' actualizado.`, // Descripción
+        projectData.id,
+      )
 
       if (error) {
         console.error('Error updating project:', error.message, error)

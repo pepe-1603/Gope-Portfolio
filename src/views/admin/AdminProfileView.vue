@@ -148,7 +148,7 @@ const handleEditProfile = () => {
 const handleProfileUpdated = () => {
   console.log('AdminProfileView: Evento @updated recibido. Cerrando formulario.')
   isEditing.value = false
-  toast.success('Perfil actualizado con éxito.')
+  toast.success('Edicion de Perfil terminado.')
 }
 
 const handleCancelEdit = () => {

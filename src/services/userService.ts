@@ -2,6 +2,7 @@
 
 import supabase from '@/lib/supabaseClient'
 import type { User } from '@supabase/supabase-js'
+import { activityService } from './activityService'
 
 export const userService = {
   /**
@@ -20,6 +21,13 @@ export const userService = {
         console.error('Error al cambiar la contraseña:', error.message)
         throw error
       }
+      // ✅ LOG DE ACTIVIDAD: Actualización (Cambio de Contraseña)
+      await activityService.logActivity(
+        'UPDATE',
+        'user', // Tipo de Recurso: user
+        `Contraseña actualizada exitosamente.`, // Descripción
+        data.user?.id,
+      )
       return data.user
     } catch (error) {
       console.error('Error en changePassword:', error)

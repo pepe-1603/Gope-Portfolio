@@ -2,6 +2,7 @@
 
 import supabase from '@/lib/supabaseClient'
 import { v4 as uuidv4 } from 'uuid'
+import { activityService } from './activityService'
 
 // Definimos las variables de entorno.
 // Si no están definidas, usamos un valor por defecto para evitar errores.
@@ -20,14 +21,11 @@ export const StorageService = {
    * @param folderPath (Opcional) La ruta de la carpeta.
    * @returns {Promise<string>} La URL pública del archivo.
    */
-  uploadFile: async (
-    bucketName: string,
-    file: File,
-    folderPath: string = ''
-  ): Promise<string> => {
-
+  uploadFile: async (bucketName: string, file: File, folderPath: string = ''): Promise<string> => {
     try {
-      const path = folderPath ? `${folderPath}/${uuidv4()}-${file.name}` : `${uuidv4()}-${file.name}`
+      const path = folderPath
+        ? `${folderPath}/${uuidv4()}-${file.name}`
+        : `${uuidv4()}-${file.name}`
       const { data, error } = await supabase.storage.from(bucketName).upload(path, file)
 
       if (error) {
@@ -35,9 +33,15 @@ export const StorageService = {
         throw new Error(`No se pudo subir el archivo: ${error.message}`)
       }
 
-      const { data: publicUrlData } = supabase.storage
-        .from(bucketName)
-        .getPublicUrl(data.path)
+      const { data: publicUrlData } = supabase.storage.from(bucketName).getPublicUrl(data.path)
+
+      // ✅ LOG DE ACTIVIDAD: Subida
+      await activityService.logActivity(
+        'CREATE',
+        'storage', // Tipo de Recurso: storage
+        `Archivo '${file.name}' subido al bucket '${bucketName}'.`, // Descripción
+        data.path, // ID del recurso (usamos el path del archivo)
+      )
 
       return publicUrlData.publicUrl
     } catch (error) {
@@ -58,7 +62,7 @@ export const StorageService = {
     bucketName: string,
     oldUrl: string,
     newFile: File,
-    folderPath: string = ''
+    folderPath: string = '',
   ): Promise<string> => {
     try {
       const path = oldUrl.split(`${bucketName}/`)[1]
@@ -70,7 +74,14 @@ export const StorageService = {
       const { error: deleteError } = await supabase.storage.from(bucketName).remove([path])
       if (deleteError) {
         console.warn('Advertencia: No se pudo eliminar el archivo antiguo:', deleteError.message)
-      }
+      } // ✅ LOG DE ACTIVIDAD: Actualización (Antes de la subida del nuevo archivo)
+
+      await activityService.logActivity(
+        'UPDATE',
+        'storage',
+        `Archivo reemplazado en el bucket '${bucketName}'. (Antiguo: ${path})`,
+        path,
+      )
 
       return await StorageService.uploadFile(bucketName, newFile, folderPath)
     } catch (error) {
@@ -79,7 +90,7 @@ export const StorageService = {
     }
   },
 
-/**
+  /**
    * Elimina un archivo de un bucket.
    * @param bucketName El nombre del bucket.
    * @param fileName El nombre del archivo a eliminar.
@@ -93,6 +104,13 @@ export const StorageService = {
         console.error('Error al eliminar el archivo:', error.message)
         throw new Error(`No se pudo eliminar el archivo: ${error.message}`)
       }
+      // ✅ LOG DE ACTIVIDAD: Eliminación
+      await activityService.logActivity(
+        'DELETE',
+        'storage',
+        `Archivo '${fileName}' eliminado del bucket '${bucketName}'.`,
+        fileName,
+      )
     } catch (error) {
       console.error('Error en deleteFile:', error)
       throw error

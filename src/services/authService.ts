@@ -2,23 +2,42 @@
 
 import supabase from '@/lib/supabaseClient'
 import type { AuthTokenResponsePassword, User } from '@supabase/supabase-js'
+import { activityService } from './activityService'
 
 export const login = async (credentials: AuthTokenResponsePassword) => {
   const { data, error } = await supabase.auth.signInWithPassword(credentials)
 
   if (error) {
     throw error
-  }
-
+  } // Nota: El email del usuario será capturado automáticamente dentro de logActivity
+  // ✅ LOG DE ACTIVIDAD: Inicio de Sesión
+  await activityService.logActivity(
+    'LOGIN', // Nueva acción: LOGIN
+    'auth', // Tipo de Recurso
+    `Inicio de sesión exitoso.`, // Descripción
+  )
   return data.user
 }
 
 export const logout = async (): Promise<void> => {
+  // 🛑 Nota: Necesitamos obtener el usuario ANTES de desloguearlo
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   const { error } = await supabase.auth.signOut()
 
   if (error) {
     throw error
-  }
+  } // Usamos el email que Pinia (o el sistema de caché) tenía antes de hacer signOut
+
+  // ✅ LOG DE ACTIVIDAD: Cierre de Sesión
+  await activityService.logActivity(
+    'LOGOUT', // Nueva acción: LOGOUT
+    'auth', // Tipo de Recurso
+    `Cierre de sesión manual.`, // Descripción
+    user?.id,
+  )
 }
 
 export const getCurrentUser = async (): Promise<User | null> => {

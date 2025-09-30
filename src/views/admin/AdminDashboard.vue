@@ -6,8 +6,8 @@
 
     <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       <div
-        v-for="i in 4"
-        :key="i"
+        v-for="n in 4"
+        :key="`skeleton-${n}`"
         class="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 shadow animate-pulse h-32"
       ></div>
     </div>
@@ -68,7 +68,19 @@
           <h2 class="text-xl font-semibold dark:text-gray-100 mb-4">
             Distribución de Proyectos por Tecnología
           </h2>
-          <p class="text-gray-500 dark:text-gray-400">Placeholder para gráfica.</p>
+
+          <div v-if="distributionLoading" class="flex justify-center items-center h-[350px]">
+            <UiSpinner size="lg" />
+          </div>
+
+          <div v-else-if="techDistribution.length > 0">
+            <DoughnutChart :data="techDistribution" />
+          </div>
+
+          <div v-else class="text-center py-12 text-gray-500 dark:text-gray-400">
+            <FontAwesomeIcon icon="fa-solid fa-chart-pie" class="text-2xl mb-2" />
+            <p>No hay datos disponibles para la distribución de tecnologías.</p>
+          </div>
         </UiCard>
 
         <div class="lg:col-span-4 flex flex-col gap-6">
@@ -133,7 +145,7 @@
         </div>
       </div>
 
-      <UiCard class="bg-white dark:bg-gray-800 shadow-lg p-6 min-h-[250px]">
+      <UiCard class="bg-white dark:bg-gray-800 shadow-lg p-6 min-h-[250px]" full-width>
         <h2 class="text-xl font-semibold dark:text-gray-100 mb-4">Log de Actividad Reciente</h2>
 
         <div v-if="activityLoading" class="flex justify-center items-center min-h-[150px]">
@@ -181,9 +193,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { statsService } from '@/services/statsService'
+import { statsService, type TechDistribution } from '@/services/statsService'
 import UiCard from '@/components/ui/UiCard.vue'
 import UiAlert from '@/components/ui/UiAlert.vue'
 // ✅ IMPORTACIÓN DE AMBAS FUNCIONES DE FORMATO
@@ -197,12 +209,14 @@ import {
   faBriefcase,
   faClockRotateLeft,
   faDatabase,
-  faArrowUpRightFromSquare, // ✅ Nuevo ícono para Almacenamiento
+  faArrowUpRightFromSquare,
+  faChartPie, // ✅ Nuevo ícono para Almacenamiento
 } from '@fortawesome/free-solid-svg-icons'
 import type { AdminActivity } from '@/types/activity'
 import { activityService } from '@/services/activityService'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import UiBadge from '@/components/ui/UiBadge.vue'
+import DoughnutChart from '@/components/charts/DoughnutChart.vue'
 
 // ✅ Añadimos el nuevo ícono a la librería
 library.add(
@@ -212,6 +226,7 @@ library.add(
   faClockRotateLeft,
   faDatabase,
   faArrowUpRightFromSquare,
+  faChartPie,
 )
 
 const router = useRouter()
@@ -226,7 +241,14 @@ interface DashboardStats {
   storageUsageBytes: number
 }
 
-const stats = ref<DashboardStats | null>(null)
+const stats = reactive<DashboardStats>({
+  projects: 0,
+  technologies: 0,
+  experience: 0,
+  latestProject: null,
+  storageUsageBytes: 0,
+})
+
 const loading = ref(true)
 const hasError = ref(false)
 
@@ -234,14 +256,23 @@ const hasError = ref(false)
 const activityLog = ref<AdminActivity[]>([])
 const activityLoading = ref(true)
 
+// ✅ NUEVO ESTADO PARA LA GRÁFICA
+const techDistribution = ref<TechDistribution[]>([])
+const distributionLoading = ref(true)
+
 const fetchStats = async () => {
   loading.value = true
   hasError.value = false
   try {
-    stats.value = (await statsService.getDashboardStats()) as DashboardStats
+    const data = await statsService.getDashboardStats()
+    // Asignamos cada propiedad manualmente
+    stats.projects = data.projects
+    stats.technologies = data.technologies
+    stats.experience = data.experience
+    stats.latestProject = data.latestProject
+    stats.storageUsageBytes = data.storageUsageBytes
   } catch (e) {
     hasError.value = true
-    stats.value = null
     console.error('Failed to load dashboard stats:', e)
   } finally {
     loading.value = false
@@ -278,8 +309,23 @@ const getActivityBadgeIntent = (action: string) => {
   }
 }
 
+// ✅ NUEVA FUNCIÓN PARA CARGAR LA DISTRIBUCIÓN
+const fetchTechDistribution = async () => {
+  distributionLoading.value = true
+  try {
+    techDistribution.value = await statsService.getTechDistribution()
+  } catch (e) {
+    console.error('Failed to load tech distribution:', e)
+  } finally {
+    distributionLoading.value = false
+  }
+}
+
 onMounted(() => {
   fetchStats()
   fetchActivityLog()
+  fetchTechDistribution()
+
+  console.log('Stats log: ', stats)
 })
 </script>

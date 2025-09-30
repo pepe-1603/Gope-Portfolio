@@ -2,6 +2,7 @@
 
 import supabase from '@/lib/supabaseClient'
 import type { Tables } from '@/types/supabase'
+import { activityService } from './activityService'
 
 const EXPERIENCE_TABLE = 'work_experience'
 
@@ -36,16 +37,21 @@ export const experienceService = {
   createExperience: async (
     experienceData: Tables<'work_experience'>['Insert'],
   ): Promise<Tables<'work_experience'>> => {
-    const { data, error } = await supabase
-      .from(EXPERIENCE_TABLE)
-      .insert([experienceData])
-      .select()
+    const { data, error } = await supabase.from(EXPERIENCE_TABLE).insert([experienceData]).select()
 
     if (error) {
       console.error('Error creating work experience:', error)
       throw error
     }
-    return data[0]
+    // ✅ LOG DE ACTIVIDAD: Creación
+    const newExperience = data[0]
+    await activityService.logActivity(
+      'CREATE',
+      'experience', // Tipo de Recurso
+      `Experiencia laboral '${newExperience.company}' creada.`, // Descripción
+      newExperience.id,
+    )
+    return newExperience
   },
 
   /**
@@ -68,7 +74,16 @@ export const experienceService = {
       console.error('Error updating work experience:', error)
       throw error
     }
-    return data[0]
+
+    // ✅ LOG DE ACTIVIDAD: Actualización
+    const updatedExperience = data[0]
+    await activityService.logActivity(
+      'UPDATE',
+      'experience', // Tipo de Recurso
+      `Experiencia laboral '${updatedExperience.company}' actualizada.`, // Descripción
+      id,
+    )
+    return updatedExperience
   },
 
   /**
@@ -77,11 +92,27 @@ export const experienceService = {
    * @returns {Promise<void>}
    */
   deleteExperience: async (id: string): Promise<void> => {
+    // Opcional: Obtener datos antes de eliminar para un log más descriptivo
+    const { data: experienceBeforeDelete } = await supabase
+      .from(EXPERIENCE_TABLE)
+      .select('company')
+      .eq('id', id)
+      .single()
+
     const { error } = await supabase.from(EXPERIENCE_TABLE).delete().eq('id', id)
 
     if (error) {
       console.error('Error deleting work experience:', error)
       throw error
     }
+
+    // ✅ LOG DE ACTIVIDAD: Eliminación
+    const companyName = experienceBeforeDelete?.company || `ID: ${id}`
+    await activityService.logActivity(
+      'DELETE',
+      'experience', // Tipo de Recurso
+      `Experiencia laboral '${companyName}' eliminada.`, // Descripción
+      id,
+    )
   },
 }

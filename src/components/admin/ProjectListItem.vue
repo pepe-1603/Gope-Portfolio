@@ -54,13 +54,14 @@ const handleMove = () => {
       />
       <div class="block space-y-1 mt-2">
         <p
-          class="font-semibold text-blue-600 dark:text-blue-700"
+          class="font-semibold text-blue-600 dark:text-blue-500"
           :class="{ 'text-sm md:text-base': !isGridItem, 'text-lg': isGridItem }"
         >
           {{ project.title }}
           <UiBadge
             :color="project.is_published ? 'green' : 'red'"
             size="xs"
+            class="text-[.60rem]"
             pointer
             :text="project.is_published ? 'público' : 'privado'"
           />

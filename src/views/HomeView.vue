@@ -1,30 +1,25 @@
 <template>
   <!-- Contenedor principal de la landing page -->
-  <div
-    class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 dark:from-gray-900 dark:to-black text-white p-4"
-  >
-    <div class="max-w-4xl w-full text-center space-y-8 animate-fade-in">
+  <!-- class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 dark:from-gray-900 dark:to-black text-white p-4" -->
+  <div class="flex items-center justify-center min-h-screen p-4">
+    <div v-if="!profilePublic" class="text-2xl animate-pulse">Cargando perfil...</div>
+    <div v-else class="max-w-4xl w-full text-center space-y-8 animate-fade-in">
       <!-- Sección de Imagen/Ilustración (Opcional) -->
-      <!-- Puedes reemplazar esta imagen de placeholder con una tuya -->
       <img
-        src="https://placehold.co/150x150/ffffff/000000?text=Tu+Foto"
-        alt="Tu Foto de Perfil"
-        class="rounded-full mx-auto shadow-2xl border-4 border-white transform hover:scale-105 transition-transform duration-300"
+        :src="profilePublic.avatar || 'https://placehold.co/150x150/ffffff/000000?text=Jose+CGope'"
+        :alt="`Foto de Perfil de ${profilePublic.name}`"
+        class="w-48 h-48 rounded-full object-cover mx-auto shadow-2xl border-4 border-white transform hover:scale-105 transition-transform duration-300"
       />
-      <!--  -->
-
-      <!-- Nombre, título y descripción breve -->
       <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight">
-        Hola, soy <span class="text-yellow-300">José 👋</span>
+        Hola, soy
+        <span class="text-yellow-300">{{ profilePublic.name || 'Desarrollador' }} 👋</span>
       </h1>
       <p class="mt-4 text-xl md:text-2xl font-light leading-relaxed">
-        Un apasionado <span class="font-bold text-yellow-300">Desarrollador Full-stack</span>
+        <span class="font-bold text-yellow-300">{{
+          profilePublic.bio || 'Desarrollador Full-stack'
+        }}</span>
         creando experiencias web increíbles.
       </p>
-      <p class="text-lg md:text-xl text-gray-200">
-        Me encanta transformar ideas complejas en soluciones digitales elegantes y funcionales.
-      </p>
-
       <!-- Botones de Call To Action -->
       <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4">
         <router-link to="/proyectos">
@@ -49,17 +44,43 @@
           </button>
         </router-link>
       </div>
-
-      <LoginForm />
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import LoginForm from '@/components/LoginForm.vue';
+// src/views/HomeView.vue (o tu componente de perfil público)
+import { profileService } from '@/services/profileService'
+import type { Tables } from '@/types/supabase' // ✅ Necesitas este tipo
+import { onMounted, ref } from 'vue'
 
-// No se necesita lógica específica en el script para esta landing page estática.
+// 🛑 Corrección 1: Usar ref para el perfil y tiparlo.
+const profilePublic = ref<Tables<'user_profiles'> | null>(null)
+
+// 🛑 Corrección 2: Definir la variable usando ref o const si es fija.
+const adminUuid = ref<string>('')
+
+onMounted(async () => {
+  // ✅ onMounted debe ser async para usar await dentro.
+  adminUuid.value = import.meta.env.VITE_ADMIN_UUID
+
+  if (!adminUuid.value) {
+    console.error('VITE_ADMIN_UUID no está definido. No se puede cargar el perfil público.')
+    return
+  }
+  if (import.meta.env.DEV) {
+    console.log('Perfil Público ID:', adminUuid)
+  }
+
+  try {
+    // 🛑 Corrección 3: Llamar al servicio y usar await.
+    const data = await profileService.getProfileByUserId(adminUuid.value) // 🛑 Corrección 4: Asignar al valor del ref
+
+    profilePublic.value = data
+  } catch (error) {
+    console.error('Error al cargar el perfil público:', error)
+  }
+})
 </script>
 
 <style scoped>

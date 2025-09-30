@@ -2,6 +2,7 @@
 
 import supabase from '@/lib/supabaseClient'
 import type { Tables } from '@/types/supabase'
+import { activityService } from './activityService'
 
 const TECHS_TABLE = 'techs'
 
@@ -75,6 +76,13 @@ export const techService = {
         console.error('Error creating technology:', error.message)
         throw error
       }
+      // ✅ LOG DE ACTIVIDAD: Creación
+      await activityService.logActivity(
+        'CREATE',
+        'tech', // Tipo de Recurso
+        `Tecnología '${techData.name}' creada.`, // Descripción
+        techData.id,
+      )
       return data
     } catch (error) {
       console.error('Error in createTech:', error)
@@ -120,6 +128,13 @@ export const techService = {
         console.error('Error updating technology:', error.message)
         throw error
       }
+      // ✅ LOG DE ACTIVIDAD: Actualización
+      await activityService.logActivity(
+        'UPDATE',
+        'tech', // Tipo de Recurso
+        `Tecnología '${techData.name || id}' actualizada.`, // Descripción
+        id,
+      )
       return data
     } catch (error) {
       console.error('Error in updateTech:', error)
@@ -134,11 +149,16 @@ export const techService = {
    */
   deleteTech: async (id: string): Promise<void> => {
     try {
+      // Opcional: Obtener el nombre antes de eliminar para un log más descriptivo
+      const techToDelete = await techService.getTechById(id)
+      const name = techToDelete?.name || `ID: ${id}`
       const { error } = await supabase.from(TECHS_TABLE).delete().eq('id', id)
       if (error) {
         console.error('Error deleting technology:', error.message)
         throw error
       }
+      // ✅ LOG DE ACTIVIDAD: Eliminación
+      await activityService.logActivity('DELETE', 'tech', `Tecnología '${name}' eliminada.`, id)
     } catch (error) {
       console.error('Error in deleteTech:', error)
       throw error

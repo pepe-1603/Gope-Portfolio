@@ -294,7 +294,7 @@ export default defineComponent({
 
     const fetchProjects = async () => {
       try {
-        const data = await projectService.getAllProjects()
+        const data = await projectService.getAllProjectsWithoutPagination()
         if (data) {
           projects.value = data
         }
