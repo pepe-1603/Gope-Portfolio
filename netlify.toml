@@ -1,11 +1,22 @@
 # netlify.toml
+
 [build]
-  # Configura la ruta base para todos los assets si tu aplicación usa un path base diferente
-  # publish = "dist" 
-  # command = "npm run build"
-  
-# Si el error persiste, a veces forzar los encabezados en el toml ayuda:
+  # Comando que Netlify ejecuta para compilar tu aplicación Vue/Vite
+  command = "npm run build"
+  # Directorio donde Vite coloca los archivos finales
+  publish = "dist"
+
+# Configuración para forzar el tipo MIME para los assets de JavaScript y Módulos
+# Esto corrige el error 'text/vnd.trolltech.linguist'
 [[headers]]
-  for = "/*"
+  # Aplica a todos los archivos estáticos generados (generalmente en /assets)
+  for = "/assets/*"
+  [headers.values]
+    # Establece el tipo MIME correcto
+    Content-Type = "application/javascript"
+
+[[headers]]
+  # Esto también aplica a cualquier otro archivo con extensión JS (como main.ts compilado)
+  for = "*.js"
   [headers.values]
     Content-Type = "application/javascript"
