@@ -19,4 +19,7 @@
   # Esto también aplica a cualquier otro archivo con extensión JS (como main.ts compilado)
   for = "*.js"
   [headers.values]
+ main
     Content-Type = "application/javascript"
+    Content-Type = "application/javascript"
+    main
