@@ -1,7 +1,7 @@
 // src/services/techService.ts
 
 import supabase from '@/lib/supabaseClient'
-import type { Tables } from '@/types/supabase'
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import { activityService } from './activityService'
 
 const TECHS_TABLE = 'techs'
@@ -69,7 +69,7 @@ export const techService = {
    * @param techData Los datos de la nueva tecnología.
    * @returns {Promise<Tables<'techs'>>} Una promesa que resuelve con el objeto de la tecnología creada.
    */
-  createTech: async (techData: Tables<'techs'>['Insert']): Promise<Tables<'techs'>> => {
+  createTech: async (techData: TablesInsert<'techs'>): Promise<Tables<'techs'>> => {
     try {
       const { data, error } = await supabase.from(TECHS_TABLE).insert(techData).select().single()
       if (error) {
@@ -116,7 +116,7 @@ export const techService = {
    * @param techData Los datos a actualizar de la tecnología.
    * @returns {Promise<Tables<'techs'>>} Una promesa que resuelve con el objeto de la tecnología actualizada.
    */
-  updateTech: async (id: string, techData: Tables<'techs'>['Update']): Promise<Tables<'techs'>> => {
+  updateTech: async (id: string, techData: TablesUpdate<'techs'>): Promise<Tables<'techs'>> => {
     try {
       const { data, error } = await supabase
         .from(TECHS_TABLE)

@@ -1,7 +1,7 @@
 // src/services/experienceService.ts
 
 import supabase from '@/lib/supabaseClient'
-import type { Tables } from '@/types/supabase'
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import { activityService } from './activityService'
 
 const EXPERIENCE_TABLE = 'work_experience'
@@ -35,7 +35,7 @@ export const experienceService = {
    * @returns {Promise<Tables<'work_experience'>>}
    */
   createExperience: async (
-    experienceData: Tables<'work_experience'>['Insert'],
+    experienceData: TablesInsert<'work_experience'>, // Usamos el nuevo tipo
   ): Promise<Tables<'work_experience'>> => {
     const { data, error } = await supabase.from(EXPERIENCE_TABLE).insert([experienceData]).select()
 
@@ -62,7 +62,7 @@ export const experienceService = {
    */
   updateExperience: async (
     id: string,
-    experienceData: Tables<'work_experience'>['Update'],
+    experienceData: TablesUpdate<'work_experience'>, // Usamos el nuevo tipo
   ): Promise<Tables<'work_experience'>> => {
     const { data, error } = await supabase
       .from(EXPERIENCE_TABLE)
