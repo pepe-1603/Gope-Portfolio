@@ -20,22 +20,28 @@ import { useAuthStore } from './stores/authStore'
 const app = createApp(App)
 const pinia = createPinia()
 
-// 1. Instala el plugin de persistencia
-pinia.use(piniaPluginPersistedstate)
+// Función ASYNC para inicializar la aplicación
+async function initApp() {
+  // 1. Instala el plugin de persistencia
+  pinia.use(piniaPluginPersistedstate)
 
-// 2. Vincula Pinia a la aplicación ANTES de usar cualquier store
-app.use(pinia)
+  // 2. Vincula Pinia a la aplicación ANTES de usar cualquier store
+  app.use(pinia)
 
-// 3. Ahora puedes usar el store de forma segura
-// Carga el estado de autenticación antes de montar la app
-const authStore = useAuthStore()
-await authStore.checkAuth()
+  // 3. Ahora puedes usar el store de forma segura
+  // Carga el estado de autenticación antes de montar la app
+  const authStore = useAuthStore()
+  await authStore.checkAuth()
 
-// 4. Instala otros plugins y el router
-app.use(modalPlugin)
-app.use(router)
+  // 4. Instala otros plugins y el router
+  app.use(modalPlugin)
+  app.use(router)
 
-// Registramos el componente de Font Awesome globalmente
-app.component('font-awesome-icon', FontAwesomeIcon)
+  // Registramos el componente de Font Awesome globalmente
+  app.component('font-awesome-icon', FontAwesomeIcon)
 
-app.mount('#app')
+  app.mount('#app')
+}
+
+// Llama a ini
+initApp()
