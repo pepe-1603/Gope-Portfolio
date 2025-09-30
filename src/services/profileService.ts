@@ -1,7 +1,7 @@
 // src/services/profileService.ts
 
 import supabase from '@/lib/supabaseClient'
-import type { Tables } from '@/types/supabase'
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import { activityService } from './activityService'
 
 const PROFILES_TABLE = 'user_profiles'
@@ -70,7 +70,7 @@ export const profileService = {
    * @returns {Promise<Tables<'user_profiles'>>}
    */
   createProfile: async (
-    profileData: Tables<'user_profiles'>['Insert'],
+    profileData: TablesInsert<'user_profiles'>, // Usamos el nuevo tipo
   ): Promise<Tables<'user_profiles'>> => {
     const { data, error } = await supabase.from(PROFILES_TABLE).insert([profileData]).select()
 
@@ -82,7 +82,7 @@ export const profileService = {
     await activityService.logActivity(
       'CREATE',
       'profile', // Tipo de Recurso
-      `Perfil de usuario ${profileData.full_name || data[0].id} creado.`, // Descripción
+      `Perfil de usuario ${profileData.name || data[0].id} creado.`, // Descripción
       data[0].user_id,
     )
     return data[0]
@@ -94,7 +94,7 @@ export const profileService = {
    * @returns {Promise<Tables<'user_profiles'>>}
    */
   updateProfile: async (
-    profileData: Tables<'user_profiles'>['Update'],
+    profileData: TablesUpdate<'user_profiles'>, // Usamos el nuevo tipo
   ): Promise<Tables<'user_profiles'>> => {
     const {
       data: { user },
