@@ -18,7 +18,12 @@ export interface Database {
           id: string
           user_id: string | null
           name: string | null
-          role: 'admin' | 'viewer' | null
+          // ✅ CAMBIO 1: El nuevo campo para el Título Público/Profesional
+          title: string | null
+          //cambio 2: El neuvo cmapo parra una frase que acompaña al titulo
+          tagline: string | null
+          // ✅ CAMBIO 3: El rol se mantiene para la lógica de acceso (admin, viewer, etc.)
+          role: 'admin' | 'viewer' | 'user' | null // Ajustado para incluir 'user'
           avatar: string | null
           bio: string | null
           github_url: string | null

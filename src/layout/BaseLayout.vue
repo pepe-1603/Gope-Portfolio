@@ -48,20 +48,67 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { RouterView } from 'vue-router'
+<script setup lang="ts" name="BaseLayout">
+import { onMounted, onUnmounted, ref } from 'vue'
+import { RouterView, useRouter } from 'vue-router'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons'
 import SettingsDropdown from '@/components/common/SettingsDropdown.vue'
 import PublicNavMenu from '@/components/layout/PublicNavMenu.vue'
+import { useAuthStore } from '@/stores/authStore'
 
 library.add(faBars, faTimes)
 
 const isMobileMenuOpen = ref(false)
+const router = useRouter()
+const authStore = useAuthStore()
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
 }
+
+const handleAdminAccess = () => {
+  // 1. Si no está logueado, vamos directamente al login. (UX Rápida)
+  if (!authStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  // 2. Si está logueado, pero no es admin, redirigimos a home. (UX Discreta)
+  // Asumiendo que el rol requerido es 'admin'
+  if (authStore.profile?.role !== 'admin') {
+    router.push('/')
+    return
+  }
+
+  // 3. ¡Es Admin y Logueado! Redirigimos al panel.
+  router.push('/admin')
+}
+
+const handleAdminHotkey = (event: KeyboardEvent) => {
+  // Tecla 'A' y Modificadores:
+  // Windows: CtrlKey + AltKey + A
+  // Mac: MetaKey (Cmd) + AltKey + A
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+  const isWindows = !isMac
+
+  const modifierKey = isMac ? event.metaKey : event.ctrlKey
+
+  if (event.key.toUpperCase() === 'A' && event.altKey && modifierKey) {
+    console.log('Atajo de teclado de administrador detectado.')
+    handleAdminAccess() // ✅ Usar la función que contiene la lógica de seguridad
+    event.preventDefault() // Detiene cualquier acción por defecto (como guardar)
+  }
+}
+
+onMounted(() => {
+  // Añadir el listener al montar el componente (al iniciar la aplicación)
+  window.addEventListener('keydown', handleAdminHotkey)
+})
+
+onUnmounted(() => {
+  // Quitar el listener al destruir el componente
+  window.removeEventListener('keydown', handleAdminHotkey)
+})
 </script>

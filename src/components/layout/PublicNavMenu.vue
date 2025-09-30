@@ -12,18 +12,18 @@
     >
       Sobre Mí
     </router-link>
-    <router-link
+    <!-- <router-link
       to="/admin"
       class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
     >
       Admin Panel
-    </router-link>
-    <router-link
+    </router-link> -->
+    <!-- <router-link
       to="/test"
       class="text-gray-700 hover:text-indigo-600 dark:text-gray-300 dark:hover:text-indigo-400"
     >
       Test Preview
-    </router-link>
+    </router-link> -->
     <SettingsDropdown />
   </div>
 </template>
