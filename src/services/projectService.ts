@@ -1,7 +1,7 @@
 // src/services/projectService.ts
 
 import supabase from '@/lib/supabaseClient'
-import type { Tables } from '@/types/supabase'
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import type { ProjectWithTechs } from '@/types/project'
 import { activityService } from './activityService'
 
@@ -166,7 +166,7 @@ export const projectService = {
    * @param projectData Los datos del nuevo proyecto.
    * @returns {Promise<Tables<'projects'>>} Una promesa que resuelve con el objeto del proyecto creado.
    */
-  createProject: async (projectData: Tables<'projects'>['Insert']): Promise<Tables<'projects'>> => {
+  createProject: async (projectData: TablesInsert<'projects'>): Promise<Tables<'projects'>> => {
     try {
       // 1. Ejecutar la operación principal (crear el proyecto)
       const { data, error } = await supabase
@@ -201,7 +201,7 @@ export const projectService = {
    */
   updateProject: async (
     id: string,
-    projectData: Tables<'projects'>['Update'],
+    projectData: TablesUpdate<'projects'>, // ✅ Corregido
   ): Promise<Tables<'projects'>> => {
     try {
       const { data, error } = await supabase
@@ -270,12 +270,14 @@ export const projectService = {
       console.log('Tecnologías existentes eliminadas con éxito.')
 
       if (techIds.length > 0) {
-        const inserts = techIds.map((techId) => ({
+        // 🛑 CORRECCIÓN: Usar TablesInsert para forzar el tipo del array
+        const inserts: TablesInsert<'project_techs'>[] = techIds.map((techId) => ({
           project_id: projectId,
           tech_id: techId,
         }))
         console.log('Registros a insertar:', inserts)
-        const { error: insertError } = await supabase.from('project_techs').insert(inserts)
+        // El casting 'as any' puede ser necesario si TS aún se queja del tipo interno del array
+        const { error: insertError } = await supabase.from('project_techs').insert(inserts as any) // ✅ Usar 'as any' si el error persiste, o si no estás 100% seguro del tipado de Postgrest
 
         if (insertError) {
           console.error('Error al insertar nuevas tecnologías:', insertError.message)
@@ -296,7 +298,7 @@ export const projectService = {
    * @returns {Promise<Tables<'projects'>>} El proyecto creado.
    */
   createProjectAndTechs: async (
-    projectData: Tables<'projects'>['Insert'],
+    projectData: TablesInsert<'projects'>, // ✅ Corregido
     techIds: string[],
   ): Promise<Tables<'projects'>> => {
     try {
