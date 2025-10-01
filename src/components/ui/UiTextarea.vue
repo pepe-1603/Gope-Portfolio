@@ -5,7 +5,7 @@
     </label>
     <textarea
       :id="id"
-      :value="modelValue ?? ''" <!-- ✅ CORRECCIÓN LÍNEA 53: Aseguramos que sea una cadena vacía si es null/undefined -->
+      :value="modelValue ?? ''"
       :placeholder="placeholder"
       :disabled="disabled"
       @input="updateValue"
