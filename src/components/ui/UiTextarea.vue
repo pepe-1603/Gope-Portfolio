@@ -5,7 +5,7 @@
     </label>
     <textarea
       :id="id"
-      :value="modelValue"
+      :value="modelValue ?? ''" <!-- ✅ CORRECCIÓN LÍNEA 53: Aseguramos que sea una cadena vacía si es null/undefined -->
       :placeholder="placeholder"
       :disabled="disabled"
       @input="updateValue"
@@ -50,7 +50,8 @@ const updateValue = (event: Event) => {
 }
 
 const computedRows = computed(() => {
-  const lineCount = props.modelValue.split('\n').length
+  // ✅ CORRECCIÓN LÍNEA 66: Usamos || '' para garantizar que modelValue sea una cadena antes de .split()
+  const lineCount = (props.modelValue || '').split('\n').length
   return Math.min(Math.max(lineCount, props.minRows), props.maxRows)
 })
 
@@ -59,11 +60,11 @@ const styles = computed(() => {
     intent: props.disabled ? 'disabled' : props.errorMessage ? 'error' : props.intent,
   })
 
-  // Evita el cambio manual de tamaño por el usuario
-  // Y si llega al máximo, habilita el scroll
+  // ✅ CORRECCIÓN: Usamos || '' para garantizar que modelValue sea una cadena antes de .split()
+  const currentModelValue = props.modelValue || ''
   const dynamicStyles = [
     'resize-none',
-    props.modelValue.split('\n').length > props.maxRows ? 'overflow-y-auto' : 'overflow-hidden',
+    currentModelValue.split('\n').length > props.maxRows ? 'overflow-y-auto' : 'overflow-hidden',
   ]
 
   return [...baseStyles.split(' '), ...dynamicStyles].join(' ')
