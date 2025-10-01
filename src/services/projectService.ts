@@ -4,8 +4,7 @@ import supabase from '@/lib/supabaseClient'
 import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import type { ProjectWithTechs } from '@/types/project'
 import { activityService } from './activityService'
-
-const PROJECTS_TABLE = 'projects'
+import { TABLES } from '@/constants/tables'
 
 // ✅ AÑADIDO: Define el tipo de dato para la respuesta paginada
 export interface PaginatedResponse<T> {
@@ -25,7 +24,7 @@ export const projectService = {
   getAllProjectsWithoutPagination: async (): Promise<Tables<'projects'>[] | null> => {
     try {
       const { data, error } = await supabase
-        .from(PROJECTS_TABLE)
+        .from(TABLES.PROJECTS)
         .select('*')
         .order('created_at', { ascending: false })
 
@@ -55,7 +54,7 @@ export const projectService = {
 
       // ✅ CAMBIO: Usamos `select` con `count: 'exact'` y `range`
       const { data, count, error } = await supabase
-        .from(PROJECTS_TABLE)
+        .from(TABLES.PROJECTS)
         .select('*', { count: 'exact' })
         .order('created_at', { ascending: false })
         .range(start, end)
@@ -87,7 +86,7 @@ export const projectService = {
 
       // ✅ CAMBIO: Usamos `select` con `count: 'exact'` y `range`
       const { data, count, error } = await supabase
-        .from(PROJECTS_TABLE)
+        .from(TABLES.PROJECTS)
         .select('* , project_techs(techs(*))', { count: 'exact' })
         .eq('is_published', true)
         .order('created_at', { ascending: false })
@@ -113,7 +112,7 @@ export const projectService = {
   getProjectById: async (id: string): Promise<ProjectWithTechs | null> => {
     try {
       const { data, error } = await supabase
-        .from(PROJECTS_TABLE)
+        .from(TABLES.PROJECTS)
         .select('*, project_techs(techs(*))')
         .eq('id', id)
         .single()
@@ -141,7 +140,7 @@ export const projectService = {
   getProjectBySlug: async (slug: string): Promise<ProjectWithTechs | null> => {
     try {
       const { data, error } = await supabase
-        .from(PROJECTS_TABLE)
+        .from(TABLES.PROJECTS)
         .select('*, project_techs(techs(*))')
         .eq('slug', slug)
         .single()
@@ -170,8 +169,8 @@ export const projectService = {
     try {
       // 1. Ejecutar la operación principal (crear el proyecto)
       const { data, error } = await supabase
-        .from(PROJECTS_TABLE)
-        .insert([projectData as TablesInsert<'projects'>]) // Siempre array para inserciones simples
+        .from(TABLES.PROJECTS)
+        .insert([projectData] as any) // Siempre array para inserciones simples
         .select()
         .single()
       if (error) {
@@ -204,9 +203,10 @@ export const projectService = {
     projectData: TablesUpdate<'projects'>, // ✅ Corregido
   ): Promise<Tables<'projects'>> => {
     try {
-      const { data, error } = await supabase
-        .from(PROJECTS_TABLE)
-        .update(projectData as TablesUpdate<'projects'>) // Forzar el tipo
+      const { data, error } = await (supabase.from(TABLES.PROJECTS).update as any)(
+        // ✅ CORRECCIÓN: Aplicar 'as any' a la función .update() para romper el error 'never'.
+        projectData,
+      ) // Ya no necesita el casting en projectData
         .eq('id', id)
         .select()
         .single()
@@ -322,7 +322,7 @@ export const projectService = {
    */
   updateProjectAndTechs: async (
     projectId: string,
-    projectData: Tables<'projects'>['Update'],
+    projectData: TablesUpdate<'projects'>,
     techIds: string[],
   ): Promise<Tables<'projects'>> => {
     try {
@@ -350,7 +350,7 @@ export const projectService = {
       // Opcional: Obtener el título antes de eliminar para un log más descriptivo
       const projectToDelete = await projectService.getProjectById(id)
       const title = projectToDelete?.title || `ID: ${id}`
-      const { error, status } = await supabase.from(PROJECTS_TABLE).delete().eq('id', id)
+      const { error, status } = await supabase.from(TABLES.PROJECTS).delete().eq('id', id)
       if (error) {
         console.error('Error deleting project:', error.message)
         throw error

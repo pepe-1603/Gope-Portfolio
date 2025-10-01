@@ -1,7 +1,12 @@
 // src/services/activityService.ts
 import supabase from '@/lib/supabaseClient'
+import { fromTypedTable } from '@/lib/typedSupabase'
 import { useAuthStore } from '@/stores/authStore'
 import type { ActivityAction, ActivityResourceType, AdminActivity } from '@/types/activity.d.ts'
+import type { TablesInsert } from '@/types/supabase'
+
+// Define el tipo de inserción para la tabla, ahora que está en supabase.ts
+type AdminActivityInsert = TablesInsert<'admin_activities'>
 
 /**
  * Servicio para obtener el log de actividad reciente de los administradores.
@@ -64,13 +69,16 @@ export const activityService = {
       // userEmail = user?.email || 'System/Unknown';
     }
 
-    const { error } = await supabase.from('admin_activities').insert({
+    const payload: AdminActivityInsert = {
       user_email: userEmail,
       action: action,
       resource_type: resourceType,
       description: description,
       resource_id: resourceId,
-    })
+    }
+
+    // ✅ USAR ESTO SI LA INFERENCIA SIMPLE FALLA
+    const { error } = await (supabase.from('admin_activities') as any).insert([payload])
 
     if (error) {
       console.error('Error logging activity:', error)

@@ -106,11 +106,9 @@ const handleRecovery = async () => {
 
   try {
     // Aquí es donde se llama a la API de Supabase para enviar el correo de recuperación
-    const { error } = await resetPasswordForEmail(email.value)
-
-    if (error) {
-      throw error
-    }
+    // ANTES: const { error } = await resetPasswordForEmail(email.value)
+    // ✅ CORRECCIÓN: Llamamos a la función sin esperar ninguna propiedad 'error'
+    await resetPasswordForEmail(email.value) // La ejecución solo llega aquí si NO hubo error en el servicio.
 
     successMessage.value =
       'Se ha enviado un enlace de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada.'

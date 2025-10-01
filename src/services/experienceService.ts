@@ -45,14 +45,14 @@ export const experienceService = {
       throw error
     }
 
-    const newExperience = data[0]
+    const newExperience = data[0] as Tables<'work_experience'>
     await activityService.logActivity(
       'CREATE',
       'experience',
       `Experiencia laboral '${newExperience.company}' creada.`,
       newExperience.id,
     )
-    return newExperience
+    return newExperience as Tables<'work_experience'>
   },
 
   /**
@@ -63,11 +63,10 @@ export const experienceService = {
    */
   updateExperience: async (
     id: string,
-    experienceData: TablesUpdate<'work_experience'>, // Usamos el nuevo tipo
+    experienceData: TablesUpdate<'work_experience'>,
   ): Promise<Tables<'work_experience'>> => {
-    const { data, error } = await supabase
-      .from(TABLES.EXPERIENCE)
-      .update(experienceData)
+    // ✅ CORRECCIÓN: Tipamos la función .update() a 'any' para forzar la aceptación de datos.
+    const { data, error } = await (supabase.from(TABLES.EXPERIENCE).update as any)(experienceData) // <-- Casting en la función update
       .eq('id', id)
       .select()
 
@@ -76,8 +75,8 @@ export const experienceService = {
       throw error
     }
 
-    // ✅ LOG DE ACTIVIDAD: Actualización
-    const updatedExperience = data[0]
+    // ✅ LOG DE ACTIVIDAD: Actualización// ✅ DESPUÉS (Asegurar que el resultado es la fila esperada):
+    const updatedExperience = data[0] as Tables<'work_experience'>
     await activityService.logActivity(
       'UPDATE',
       'experience', // Tipo de Recurso
@@ -93,6 +92,8 @@ export const experienceService = {
    * @returns {Promise<void>}
    */
   deleteExperience: async (id: string): Promise<void> => {
+    type CompanySelect = { company: string | null } // Definimos el tipo esperado de la consulta
+
     // Opcional: Obtener datos antes de eliminar para un log más descriptivo
     const { data: experienceBeforeDelete } = await supabase
       .from(TABLES.EXPERIENCE)
@@ -106,9 +107,9 @@ export const experienceService = {
       console.error('Error deleting work experience:', error)
       throw error
     }
+    // ✅ CORRECCIÓN: Forzar el tipo 'CompanySelect' al resultado para acceder a 'company'
+    const companyName = (experienceBeforeDelete as CompanySelect | null)?.company || `ID: ${id}`
 
-    // ✅ LOG DE ACTIVIDAD: Eliminación
-    const companyName = experienceBeforeDelete?.company || `ID: ${id}`
     await activityService.logActivity(
       'DELETE',
       'experience', // Tipo de Recurso

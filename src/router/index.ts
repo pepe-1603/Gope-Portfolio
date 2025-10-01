@@ -19,11 +19,6 @@ const router = createRouter({
           name: 'home',
           component: HomeView,
         },
-        // {
-        //   path: '/test',
-        //   name: 'test-preview',
-        //   component: () => import('@/views/PreviewComponents.vue'),
-        // },
         {
           path: '/about',
           name: 'about-me',

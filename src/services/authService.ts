@@ -1,10 +1,11 @@
 // src/services/authService.ts
 
 import supabase from '@/lib/supabaseClient'
-import type { AuthTokenResponsePassword, User } from '@supabase/supabase-js'
+import type { SignInWithPasswordCredentials, User } from '@supabase/supabase-js'
 import { activityService } from './activityService'
 
-export const login = async (credentials: AuthTokenResponsePassword) => {
+// ✅ CORRECCIÓN: Usar el tipo de entrada correcto para la función de login.
+export const login = async (credentials: SignInWithPasswordCredentials) => {
   const { data, error } = await supabase.auth.signInWithPassword(credentials)
 
   if (error) {

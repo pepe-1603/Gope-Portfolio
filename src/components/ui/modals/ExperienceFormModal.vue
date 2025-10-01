@@ -196,7 +196,7 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { experienceService } from '@/services/experienceService'
 import { projectService } from '@/services/projectService'
-import type { Tables } from '@/types/supabase'
+import type { Tables, TablesUpdate } from '@/types/supabase'
 import type { ModalResult } from '@/types/modal'
 
 library.add(
@@ -233,7 +233,7 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const form = ref<Tables<'work_experience'>['Update']>({
+    const form = ref<TablesUpdate<'work_experience'>>({
       company: '',
       role: '',
       description: '',
@@ -264,7 +264,7 @@ export default defineComponent({
         // Excluimos `id` y `created_at` para el payload de actualización
         id: undefined,
         created_at: undefined,
-      } as Tables<'work_experience'>['Update']
+      } as TablesUpdate<'work_experience'>
       isCurrent.value = props.experienceData.end_date === null
     })
 
@@ -319,7 +319,7 @@ export default defineComponent({
         props.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
       } catch (error) {
         console.error('Error al actualizar la experiencia:', error)
-        props.__onClose({ action: 'error', payload: null } as ModalResult)
+        props.__onClose({ action: 'close', payload: null } as ModalResult)
       } finally {
         loading.value = false
       }

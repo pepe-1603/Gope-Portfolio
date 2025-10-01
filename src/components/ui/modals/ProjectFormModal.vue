@@ -398,7 +398,7 @@ export default defineComponent({
         props.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
       } catch (error) {
         console.error('Error al actualizar el proyecto:', error)
-        props.__onClose({ action: 'error', payload: null } as ModalResult)
+        props.__onClose({ action: 'close', payload: null } as ModalResult)
       } finally {
         loading.value = false
       }

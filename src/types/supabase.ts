@@ -94,6 +94,27 @@ export interface Database {
         Insert: Insertable<Database['public']['Tables']['work_experience']['Row']>
         Update: Updatable<Database['public']['Tables']['work_experience']['Row']>
       }
+      // ✅ AÑADIDO: Definición de la tabla de actividades
+      admin_activities: {
+        Row: {
+          id: string
+          user_email: string // Asumiendo que es una columna
+          action: string // Usar string aquí, luego lo tiparemos con AdminActivity
+          resource_type: string
+          description: string
+          resource_id: string | null
+          created_at: string
+        }
+        // Usamos la tipificación general para inserción y actualización
+        // ✅ CORRECCIÓN CLAVE: Omitir 'created_at' y luego usar Insertable
+        Insert: Insertable<
+          Omit<
+            Database['public']['Tables']['admin_activities']['Row'],
+            'created_at' // <-- Esto soluciona el TS2322
+          >
+        >
+        Update: Updatable<Database['public']['Tables']['admin_activities']['Row']>
+      }
     }
     // ...Views, Functions, Enums, etc. si tienes...
   }

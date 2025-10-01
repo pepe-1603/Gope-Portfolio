@@ -72,20 +72,26 @@ export const profileService = {
   createProfile: async (
     profileData: TablesInsert<'user_profiles'>, // Usamos el nuevo tipo
   ): Promise<Tables<'user_profiles'>> => {
-    const { data, error } = await supabase.from(PROFILES_TABLE).insert([profileData]).select()
+    // ✅ CORRECCIÓN: Usamos 'as any' en la función .insert() para forzar la aceptación de datos.
+    const { data, error } = await (supabase.from(PROFILES_TABLE).insert as any)([
+      profileData,
+    ]).select()
 
     if (error) {
       console.error('Error al crear perfil:', error.message)
       throw error
     }
-    // ✅ LOG DE ACTIVIDAD: Creación (normalmente se usa en el proceso de registro)
+
+    // ✅ CORRECCIÓN: Tipamos la fila resultante para resolver TS2339.
+    const newProfile = data[0] as Tables<'user_profiles'> // ✅ LOG DE ACTIVIDAD: Creación (normalmente se usa en el proceso de registro)
+
     await activityService.logActivity(
       'CREATE',
       'profile', // Tipo de Recurso
-      `Perfil de usuario ${profileData.name || data[0].id} creado.`, // Descripción
-      data[0].user_id,
+      `Perfil de usuario ${newProfile.name || newProfile.id} creado.`, // Descripción
+      newProfile.user_id, // Ahora user_id está tipado correctamente
     )
-    return data[0]
+    return newProfile // Devolvemos el perfil tipado
   },
 
   /**
@@ -105,12 +111,12 @@ export const profileService = {
       throw new Error('User not authenticated.')
     }
 
-    const { data, error } = await supabase
-      .from(PROFILES_TABLE)
-      .update(profileData)
+    const { data, error } = await (supabase.from(PROFILES_TABLE).update as any)(
+      // ✅ CORRECCIÓN: Usamos 'as any' en la función .update() para forzar el tipo.
+      profileData,
+    )
       .eq('user_id', user.id)
       .select()
-
     if (error) {
       console.error('Error al actualizar el perfil:', error.message)
       throw error

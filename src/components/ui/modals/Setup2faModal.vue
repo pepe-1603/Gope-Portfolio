@@ -292,8 +292,9 @@ async function handleVerify() {
 
     toast.success('¡2FA ha sido habilitado con éxito!')
   } catch (error) {
+    console.error(error)
     errors.value.verificationCode = 'Código de verificación incorrecto. Inténtalo de nuevo.'
-    toast.error('Código de verificación incorrecto.')
+    toast.error(errors.value.verificationCode)
 
     verificationCode.value = ''
   } finally {
@@ -316,7 +317,7 @@ onUnmounted(async () => {
   }
 })
 onMounted(() => {
-  if (authStore.user?.factors?.length > 0) {
+  if (authStore.user?.factors?.length) {
     toast.info('La autenticación de dos factores ya está habilitada para tu cuenta.')
     handleCancel()
   } else {

@@ -173,7 +173,7 @@ export default defineComponent({
         const message = err.message || 'Ocurrió un error inesperado al cambiar la contraseña.'
         toast.error(message)
         this.formError = message
-        this.__onClose({ action: 'error', payload: null } as ModalResult)
+        this.__onClose({ action: 'close', payload: null } as ModalResult)
       } finally {
         this.isLoading = false
       }

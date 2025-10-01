@@ -55,6 +55,7 @@ const handleResendVerification = async () => {
     await resendVerificationEmail()
     toast.success('¡Correo de verificación enviado! Por favor, revisa tu bandeja de entrada.')
   } catch (error) {
+    console.error(error)
     toast.error('Ocurrió un error al intentar reenviar el correo. Por favor, inténtalo de nuevo.')
   } finally {
     isResending.value = false

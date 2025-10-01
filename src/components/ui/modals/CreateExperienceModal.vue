@@ -200,7 +200,7 @@ export default defineComponent({
         this.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
       } catch (error) {
         console.error('Error al crear la experiencia:', error)
-        this.__onClose({ action: 'error', payload: null })
+        this.__onClose({ action: 'close', payload: null } as ModalResult)
       } finally {
         this.loading = false
       }

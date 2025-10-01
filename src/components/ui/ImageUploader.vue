@@ -59,7 +59,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import UiAlert from '@/components/ui/UiAlert.vue' // Importa el nuevo componente
 import { StorageService } from '@/services/storageService'
-import { useToastStore } from '@/stores/toast'
+import { useToast } from '@/composables/useToast'
 
 library.add(faCloudArrowUp, faXmark, faSpinner)
 
@@ -92,7 +92,7 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const previewUrl = ref<string | null>(props.modelValue)
 const loading = ref(false)
 const uploadError = ref<string | null>(null) // Nuevo estado para el error
-const toastStore = useToastStore()
+const toast = useToast()
 
 // Sincronizar la URL de la prop con la vista previa
 watch(
@@ -122,10 +122,7 @@ const handleFileChange = async (event: Event) => {
       }
     } catch (error) {
       console.error('Error al eliminar la imagen anterior:', error)
-      toastStore.addToast({
-        message: 'Error al eliminar la imagen anterior. Se subirá la nueva.',
-        type: 'warning',
-      })
+      toast.warning('Error al eliminar la imagen anterior. Se subirá la nueva.')
     }
   }
 
@@ -133,15 +130,12 @@ const handleFileChange = async (event: Event) => {
     const publicUrl = await StorageService.uploadFile(props.bucketName, file, props.folderPath)
     emit('update:modelValue', publicUrl)
     emit('upload-success', publicUrl)
-    toastStore.addToast({ message: 'Imagen subida con éxito.', type: 'success' })
+    toast.success('Imagen subida con éxito.')
   } catch (error: any) {
     console.error('Error al subir el archivo:', error)
     uploadError.value = error.message || 'Ocurrió un error al subir la imagen.' // Almacenar el error
     emit('upload-error', error)
-    toastStore.addToast({
-      message: 'Error al subir la imagen. Inténtalo de nuevo.',
-      type: 'error',
-    })
+    toast.error('Error al subir la imagen. Inténtalo de nuevo.')
   } finally {
     loading.value = false
     if (fileInput.value) {
@@ -161,14 +155,11 @@ const removeImage = async () => {
   try {
     await StorageService.deleteFile(props.bucketName, fileName)
     emit('update:modelValue', null)
-    toastStore.addToast({ message: 'Imagen eliminada con éxito.', type: 'success' })
+    toast.success('Imagen eliminada con éxito.')
   } catch (error: any) {
     console.error('Error al eliminar la imagen:', error)
     uploadError.value = error.message || 'Ocurrió un error al eliminar la imagen.'
-    toastStore.addToast({
-      message: 'Error al eliminar la imagen. Inténtalo de nuevo.',
-      type: 'error',
-    })
+    toast.error('Error al eliminar la imagen. Inténtalo de nuevo.')
   } finally {
     loading.value = false
   }

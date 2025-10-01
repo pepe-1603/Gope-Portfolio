@@ -60,6 +60,19 @@ watch(isExpanded, async (newValue) => {
   }
 })
 
+// Define la función para manejar el final de la transición
+const handleTransitionEnd = (event: Event) => {
+  // Cuando se termina de abrir (isExpanded es true)
+  if (isExpanded.value && contentRef.value) {
+    // Establecer maxHeight a 'none' o 'auto' para que el contenido se ajuste si cambia
+    contentHeight.value = 'none'
+  }
+}
+// 💡 Nota: Usar 'Event' es un tipo seguro. Si usas 'TransitionEvent' puedes necesitar una importación.
+
+// 💡 Nota: Puedes importar 'TransitionEvent' para un tipado más estricto si lo deseas,
+// pero solo declararla como una función ya resuelve el error de existencia (TS2339).
+
 // Generar un ID único para accesibilidad
 const instance = getCurrentInstance()
 const _uid = instance ? instance.uid : 0

@@ -147,17 +147,26 @@ export default defineComponent({
       loading.value = true
       try {
         await techService.updateTech(props.tech.id, form.value)
-        ;(props.__onConfirm as (result: ModalResult) => void)({ action: 'confirm', payload: null })
+        ;(props.__onConfirm as (result: ModalResult) => void)({
+          action: 'confirm',
+          payload: null,
+        } as ModalResult)
       } catch (error) {
         console.error('Error al actualizar la tecnología:', error)
-        ;(props.__onClose as (result: ModalResult) => void)({ action: 'error', payload: null })
+        ;(props.__onClose as (result: ModalResult) => void)({
+          action: 'close',
+          payload: null,
+        } as ModalResult)
       } finally {
         loading.value = false
       }
     }
 
     const handleCancel = () => {
-      ;(props.__onCancel as (result: ModalResult) => void)({ action: 'cancel', payload: null })
+      ;(props.__onCancel as (result: ModalResult) => void)({
+        action: 'cancel',
+        payload: null,
+      } as ModalResult)
     }
 
     const handleImageUploadError = () => {

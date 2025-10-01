@@ -3,8 +3,7 @@
 import supabase from '@/lib/supabaseClient'
 import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import { activityService } from './activityService'
-
-const TECHS_TABLE = 'techs'
+import { TABLES } from '@/constants/tables'
 
 // Define el tipo de dato que retornará el método de paginación
 export interface PaginatedResponse<T> {
@@ -23,7 +22,7 @@ export const techService = {
    */
   getAllTechs: async (): Promise<Tables<'techs'>[] | null> => {
     try {
-      const { data, error } = await supabase.from(TECHS_TABLE).select('*')
+      const { data, error } = await supabase.from(TABLES.TECHS).select('*')
 
       if (error) {
         console.error('Error fetching all technologies:', error.message)
@@ -50,7 +49,7 @@ export const techService = {
       const start = page * limit
       const end = start + limit - 1
       const { data, count, error } = await supabase
-        .from(TECHS_TABLE)
+        .from(TABLES.TECHS)
         .select('*', { count: 'exact' })
         .range(start, end)
       if (error) {
@@ -71,10 +70,8 @@ export const techService = {
    */
   createTech: async (techData: TablesInsert<'techs'>): Promise<Tables<'techs'>> => {
     try {
-      // ✅ DESPUÉS: Usar array y as any
-      const { data, error } = await supabase
-        .from(TECHS_TABLE)
-        .insert([techData as TablesInsert<'techs'>]) // Siempre array
+      // ✅ CORRECCIÓN: Aplicar 'as any' a la función .insert() para romper el error 'never'.
+      const { data, error } = await (supabase.from(TABLES.TECHS).insert as any)([techData]) // El casting ahora está en la función
         .select()
         .single()
       if (error) {
@@ -102,7 +99,7 @@ export const techService = {
    */
   getTechById: async (id: string): Promise<Tables<'techs'> | null> => {
     try {
-      const { data, error } = await supabase.from(TECHS_TABLE).select('*').eq('id', id).single()
+      const { data, error } = await supabase.from(TABLES.TECHS).select('*').eq('id', id).single()
       if (error && error.code !== 'PGRST116') {
         // Ignoramos el error de "no row found"
         console.error('Error fetching technology by ID:', error.message)
@@ -123,10 +120,10 @@ export const techService = {
    */
   updateTech: async (id: string, techData: TablesUpdate<'techs'>): Promise<Tables<'techs'>> => {
     try {
-      const { data, error } = await supabase
-        .from(TECHS_TABLE)
-        // ✅ DESPUÉS: Forzar el tipo de actualización
-        .update(techData as TablesUpdate<'techs'>)
+      const { data, error } = await (supabase.from(TABLES.TECHS).update as any)(
+        // ✅ CORRECCIÓN: Aplicar 'as any' a la función .update() para forzar el tipo.
+        techData,
+      )
         .eq('id', id)
         .select()
         .single()
@@ -159,7 +156,7 @@ export const techService = {
       // Opcional: Obtener el nombre antes de eliminar para un log más descriptivo
       const techToDelete = await techService.getTechById(id)
       const name = techToDelete?.name || `ID: ${id}`
-      const { error } = await supabase.from(TECHS_TABLE).delete().eq('id', id)
+      const { error } = await supabase.from(TABLES.TECHS).delete().eq('id', id)
       if (error) {
         console.error('Error deleting technology:', error.message)
         throw error

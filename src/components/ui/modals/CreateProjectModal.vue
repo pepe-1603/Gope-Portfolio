@@ -260,7 +260,7 @@ export default defineComponent({
         this.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
       } catch (error) {
         console.error('Error al crear el proyecto:', error)
-        this.__onClose({ action: 'error', payload: null } as ModalResult)
+        this.__onClose({ action: 'close', payload: null } as ModalResult)
       } finally {
         this.loading = false
       }

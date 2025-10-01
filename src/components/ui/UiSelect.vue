@@ -18,7 +18,7 @@
         :class="selectStyles"
       >
         <option v-if="placeholder" disabled value="">{{ placeholder }}</option>
-        <option v-for="option in options" :key="option.value" :value="option.value">
+        <option v-for="option in options" :key="option.value as string" :value="option.value">
           {{ option.label }}
         </option>
       </select>
@@ -54,7 +54,7 @@ const props = withDefaults(
   defineProps<{
     label?: string
     id: string
-    modelValue: string | null // Ajustamos para aceptar null
+    modelValue: string | null | undefined // Ajustamos para aceptar null
     placeholder?: string
     disabled?: boolean
     errorMessage?: string

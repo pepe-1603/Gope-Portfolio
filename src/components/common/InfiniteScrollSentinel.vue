@@ -5,8 +5,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const sentinel = ref(null)
-const observer = ref(null)
+const sentinel = ref<Element | null>(null)
+// Definimos explícitamente que el ref puede ser IntersectionObserver o null
+const observer = ref<IntersectionObserver | null>(null)
 
 // Define los eventos que el componente padre puede escuchar
 const emit = defineEmits(['intersect'])
@@ -35,6 +36,7 @@ onMounted(() => {
 onUnmounted(() => {
   // Limpia el observador cuando el componente se desmonta
   if (observer.value) {
+    observer.value.unobserve(sentinel.value as Element)
     observer.value.disconnect()
   }
 })

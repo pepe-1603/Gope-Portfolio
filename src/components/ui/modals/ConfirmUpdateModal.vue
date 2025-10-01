@@ -13,7 +13,7 @@
         :key="key"
         class="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg"
       >
-        <dt class="font-medium capitalize">{{ formatLabel(key) }}:</dt>
+        <dt class="font-medium capitalize">{{ formatLabel(key as string) }}:</dt>
         <dd class="text-gray-900 dark:text-white">
           <span class="text-gray-500 dark:text-gray-400">Original:</span>
           {{ formatValue(originalData[key]) }}

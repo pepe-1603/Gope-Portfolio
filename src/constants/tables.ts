@@ -4,6 +4,7 @@ export const TABLES = {
   EXPERIENCE: 'work_experience',
   PROJECTS: 'projects',
   PROFILES: 'user_profiles',
+  TECHS: 'techs',
 } as const
 
 // ✅ Ya no necesitas esto:
