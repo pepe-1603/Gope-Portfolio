@@ -63,19 +63,19 @@ let clickTimer: NodeJS.Timeout | null = null
 const handleAdminAccess = () => {
   // 1. Si no está logueado, vamos directamente al login. (UX Rápida)
   if (!authStore.isAuthenticated) {
-    router.push('/login')
+    router.push({ name: 'login' })
     return
   }
 
   // 2. Si está logueado, pero no es admin, redirigimos a home. (UX Discreta)
   // Asumiendo que el rol requerido es 'admin'
   if (authStore.profile?.role !== 'admin') {
-    router.push('/')
+    router.push({ name: 'home' })
     return
   }
 
   // 3. ¡Es Admin y Logueado! Redirigimos al panel.
-  router.push('/admin')
+  router.push({ name: 'admin-dashboard' })
 }
 
 const handleAvatarClick = () => {
