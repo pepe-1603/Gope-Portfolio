@@ -171,7 +171,7 @@ export const projectService = {
       // 1. Ejecutar la operación principal (crear el proyecto)
       const { data, error } = await supabase
         .from(PROJECTS_TABLE)
-        .insert(projectData)
+        .insert([projectData as TablesInsert<'projects'>]) // Siempre array para inserciones simples
         .select()
         .single()
       if (error) {
@@ -206,10 +206,10 @@ export const projectService = {
     try {
       const { data, error } = await supabase
         .from(PROJECTS_TABLE)
-        .update(projectData)
+        .update(projectData as TablesUpdate<'projects'>) // Forzar el tipo
         .eq('id', id)
         .select()
-        .single() // <--- Usa .single() para obtener un solo resultado
+        .single()
 
       console.log('data service:', data)
       // ✅ LOG DE ACTIVIDAD: Creación

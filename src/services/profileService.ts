@@ -116,7 +116,11 @@ export const profileService = {
       throw error
     }
     // ✅ LOG DE ACTIVIDAD: Actualización
-    const profileName = data[0].name || data[0].id
+    const profileName =
+      (data[0] as Tables<'user_profiles'>).name || (data[0] as Tables<'user_profiles'>).id
+    // Si no quieres repetir el casting:
+    // const updatedProfile = data[0] as Tables<'user_profiles'>
+    // const profileName = updatedProfile.name || updatedProfile.id
     await activityService.logActivity(
       'UPDATE',
       'profile', // Tipo de Recurso

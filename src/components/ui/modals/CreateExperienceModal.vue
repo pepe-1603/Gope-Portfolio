@@ -96,11 +96,21 @@ import UiSelect from '@/components/ui/UiSelect.vue'
 import UiSpinner from '@/components/ui/UiSpinner.vue'
 import { experienceService } from '@/services/experienceService'
 import { projectService } from '@/services/projectService'
-import type { Tables } from '@/types/supabase'
+import type { Tables, TablesInsert } from '@/types/supabase'
 import type { ModalResult } from '@/types/modal'
 
 // Quitamos el ícono de la imagen, ya que no se necesita
 library.add(faBuilding, faBriefcase, faCalendarAlt, faProjectDiagram)
+
+// ✅ Nuevo tipo para el formulario que soporta string (para el input) y null (para la DB)
+type ExperienceFormUI = Omit<
+  TablesInsert<'work_experience'>,
+  'start_date' | 'end_date' | 'project_id'
+> & {
+  start_date: string | null
+  end_date: string | null
+  project_id: string | null
+}
 
 export default defineComponent({
   name: 'CreateExperienceModal',
@@ -121,15 +131,16 @@ export default defineComponent({
   },
   data() {
     return {
+      // ✅ Usamos el tipo local para el estado del formulario de la UI
       form: {
         company: '',
         role: '',
         description: '',
         start_date: '',
-        // Corregimos la inicialización a una cadena vacía para evitar el error de tipo.
+        // Inicializamos a cadena vacía para que el input funcione.
         end_date: '',
         project_id: null,
-      } as Tables<'work_experience'>['Insert'],
+      } as ExperienceFormUI,
       isCurrent: false,
       projects: [] as Tables<'projects'>[],
       loading: false,
@@ -140,6 +151,7 @@ export default defineComponent({
       if (!this.projects) return []
       return [
         { value: null, label: 'Ninguno' },
+        // Aseguramos que el ID del proyecto sea un string (o null)
         ...this.projects.map((p) => ({ value: p.id, label: `${p.title} (${p.slug})` })),
       ]
     },
@@ -161,7 +173,7 @@ export default defineComponent({
   methods: {
     async fetchProjects() {
       try {
-        const data = await projectService.getAllProjects()
+        const data = await projectService.getAllProjectsWithoutPagination()
         if (data) {
           this.projects = data
         }
@@ -172,17 +184,23 @@ export default defineComponent({
     async handleSubmit() {
       this.loading = true
       try {
-        const payload = {
-          ...this.form,
-          // Enviamos `null` si `isCurrent` es true, de lo contrario el valor del formulario.
-          end_date: this.isCurrent ? null : this.form.end_date,
+        // ✅ CORRECCIÓN/MEJORA: Aseguramos el tipado final para el servicio.
+        const payload: TablesInsert<'work_experience'> = {
+          company: this.form.company,
+          role: this.form.role,
+          description: this.form.description,
+          // Convertimos cadena vacía ('') a null para Supabase
+          start_date: this.form.start_date || null,
+          // Si es actual es null, si no, toma el valor o null si está vacío.
+          end_date: this.isCurrent ? null : this.form.end_date || null,
+          project_id: this.form.project_id || null, // Asegurar que sea string o null
         }
 
         await experienceService.createExperience(payload)
         this.__onConfirm({ action: 'confirm', payload: null } as ModalResult)
       } catch (error) {
         console.error('Error al crear la experiencia:', error)
-        this.__onClose({ action: 'error', payload: null } as ModalResult)
+        this.__onClose({ action: 'error', payload: null })
       } finally {
         this.loading = false
       }

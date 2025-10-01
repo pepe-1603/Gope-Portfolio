@@ -92,10 +92,13 @@ const project = ref<ProjectWithTechs | null>(null)
 
 onMounted(async () => {
   try {
-    const slug = route.params.slug as string
+    // ✅ DESPUÉS: Forzar el tipo a string si sabes que siempre existirá, o manejarlo.
+    const projectSlug = route.params.slug as string
+    // O si puede ser un array (como lo son los parámetros de ruta en Vue Router):
+    // const projectSlug = Array.isArray(route.params.slug) ? route.params.slug[0] : route.params.slug
 
     // Aquí es donde obtenemos los datos
-    const fetchedProject = await projectService.getProjectBySlug(slug)
+    const fetchedProject = await projectService.getProjectBySlug(projectSlug)
 
     // Si los datos se obtuvieron con éxito, los asignamos
     if (fetchedProject) {
@@ -104,7 +107,7 @@ onMounted(async () => {
   } catch (err) {
     console.error('Error cargando proyecto:', err)
     // En caso de error, aseguramos que la referencia sea `null`
-    errorFetch.value = err
+    errorFetch.value = (err as Error).message
     project.value = null
   }
 })

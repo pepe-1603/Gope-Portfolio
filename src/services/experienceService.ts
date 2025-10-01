@@ -3,8 +3,8 @@
 import supabase from '@/lib/supabaseClient'
 import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase'
 import { activityService } from './activityService'
-
-const EXPERIENCE_TABLE = 'work_experience'
+import { fromTypedTable } from '@/lib/typedSupabase' // Solo necesitamos fromTypedTable
+import { TABLES } from '@/constants/tables'
 
 export const experienceService = {
   /**
@@ -14,7 +14,7 @@ export const experienceService = {
   getAllExperience: async (): Promise<Tables<'work_experience'>[] | null> => {
     try {
       const { data, error } = await supabase
-        .from(EXPERIENCE_TABLE)
+        .from(TABLES.EXPERIENCE)
         .select('*')
         .order('start_date', { ascending: false })
 
@@ -31,24 +31,25 @@ export const experienceService = {
 
   /**
    * Crea un nuevo registro de experiencia laboral.
-   * @param experienceData Los datos de la nueva experiencia.
-   * @returns {Promise<Tables<'work_experience'>>}
    */
   createExperience: async (
-    experienceData: TablesInsert<'work_experience'>, // Usamos el nuevo tipo
+    experienceData: TablesInsert<'work_experience'>,
   ): Promise<Tables<'work_experience'>> => {
-    const { data, error } = await supabase.from(EXPERIENCE_TABLE).insert([experienceData]).select()
+    // ✅ CORRECCIÓN: El error .insert desaparece porque fromTypedTable ahora funciona.
+    const { data, error } = await fromTypedTable('work_experience')
+      .insert([experienceData] as any) //puse any y el error desaparecio pero ajora arca el error en any: Unexpected any. Specify a different type.eslint@typescript-eslint/no-explicit-any ¿es necesario este rror o lo ignoramos?
+      .select()
 
     if (error) {
       console.error('Error creating work experience:', error)
       throw error
     }
-    // ✅ LOG DE ACTIVIDAD: Creación
+
     const newExperience = data[0]
     await activityService.logActivity(
       'CREATE',
-      'experience', // Tipo de Recurso
-      `Experiencia laboral '${newExperience.company}' creada.`, // Descripción
+      'experience',
+      `Experiencia laboral '${newExperience.company}' creada.`,
       newExperience.id,
     )
     return newExperience
@@ -65,7 +66,7 @@ export const experienceService = {
     experienceData: TablesUpdate<'work_experience'>, // Usamos el nuevo tipo
   ): Promise<Tables<'work_experience'>> => {
     const { data, error } = await supabase
-      .from(EXPERIENCE_TABLE)
+      .from(TABLES.EXPERIENCE)
       .update(experienceData)
       .eq('id', id)
       .select()
@@ -94,12 +95,12 @@ export const experienceService = {
   deleteExperience: async (id: string): Promise<void> => {
     // Opcional: Obtener datos antes de eliminar para un log más descriptivo
     const { data: experienceBeforeDelete } = await supabase
-      .from(EXPERIENCE_TABLE)
+      .from(TABLES.EXPERIENCE)
       .select('company')
       .eq('id', id)
       .single()
 
-    const { error } = await supabase.from(EXPERIENCE_TABLE).delete().eq('id', id)
+    const { error } = await supabase.from(TABLES.EXPERIENCE).delete().eq('id', id)
 
     if (error) {
       console.error('Error deleting work experience:', error)

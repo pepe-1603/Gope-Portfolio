@@ -71,7 +71,12 @@ export const techService = {
    */
   createTech: async (techData: TablesInsert<'techs'>): Promise<Tables<'techs'>> => {
     try {
-      const { data, error } = await supabase.from(TECHS_TABLE).insert(techData).select().single()
+      // ✅ DESPUÉS: Usar array y as any
+      const { data, error } = await supabase
+        .from(TECHS_TABLE)
+        .insert([techData as TablesInsert<'techs'>]) // Siempre array
+        .select()
+        .single()
       if (error) {
         console.error('Error creating technology:', error.message)
         throw error
@@ -120,10 +125,12 @@ export const techService = {
     try {
       const { data, error } = await supabase
         .from(TECHS_TABLE)
-        .update(techData)
+        // ✅ DESPUÉS: Forzar el tipo de actualización
+        .update(techData as TablesUpdate<'techs'>)
         .eq('id', id)
         .select()
         .single()
+
       if (error) {
         console.error('Error updating technology:', error.message)
         throw error

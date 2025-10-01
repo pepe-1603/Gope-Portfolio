@@ -118,7 +118,9 @@ const handleRecovery = async () => {
   } catch (error: any) {
     console.error('Error al enviar correo de recuperación:', error)
     formError.value =
-      error.message || 'No se pudo enviar el correo de recuperación. Inténtalo de nuevo.'
+      error && typeof error === 'object' && 'message' in error
+        ? error.message
+        : 'No se pudo enviar el correo de recuperación. Inténtalo de nuevo.'
     toast.error(formError.value)
   } finally {
     loading.value = false
