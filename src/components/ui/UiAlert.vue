@@ -11,7 +11,9 @@
 
         <div class="mt-1">
           <div ref="contentWrapper" :class="contentWrapperClasses">
-            <p v-if="description" class="mb-2">{{ description }}</p>
+            <p v-if="description" class="mb-1 text-xs">
+              {{ description }}
+            </p>
             <div v-if="$slots.default">
               <slot />
             </div>
@@ -19,8 +21,9 @@
 
           <button
             v-if="needsExpand"
+            type="button"
             @click="isExpanded = !isExpanded"
-            class="text-xs font-semibold mt-1"
+            class="text-xs text-left font-semibold mt-1 px-0.5 py-1"
             :class="textClasses"
           >
             {{ isExpanded ? 'Mostrar menos' : 'Mostrar más...' }}
@@ -65,7 +68,7 @@ import {
   type AlertVariants,
 } from '../../utils/alertStyles'
 
-type AlertIntent = AlertVariants['intent'] | 'upcoming' | 'new-feature'
+type AlertIntent = AlertVariants['intent'] | 'upcoming' | 'new-feature' | 'default'
 
 const props = defineProps<{
   intent?: AlertIntent
@@ -88,11 +91,22 @@ onMounted(() => {
   }
 })
 
+//verssion original
+// const contentWrapperClasses = computed(() => {
+//   return [
+//     'transition-max-height duration-300 ease-in-out',
+//     'max-h-24 overflow-y-hidden cursor-text',
+//     { '!max-h-full overflow-y-auto': isExpanded.value },
+//   ]
+// })
+
 const contentWrapperClasses = computed(() => {
   return [
     'transition-max-height duration-300 ease-in-out',
-    'max-h-24 overflow-y-hidden cursor-text',
-    { '!max-h-full overflow-y-auto': isExpanded.value },
+    // Establecer una altura máxima inicial (ej. 6rem o max-h-24) y ocultar el scroll.
+    'max-h-24 overflow-hidden cursor-text w-full',
+    // Cuando se expande, permitir la altura completa y el scroll vertical si es necesario.
+    { 'max-h-96 !overflow-y-auto': isExpanded.value }, // Cambiado a max-h-96 o un valor grande
   ]
 })
 
@@ -110,6 +124,8 @@ const iconForIntent = computed(() => {
       return faBolt
     case 'new-feature':
       return faStar
+    case 'default': // ✅ NUEVO: Caso default
+      return faCircleInfo // Un ícono genérico para el estado neutral
     default:
       return faCircleExclamation
   }
