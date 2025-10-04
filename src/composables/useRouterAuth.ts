@@ -40,7 +40,11 @@ export const handleAuthGuards = async (
         duration: 6000,
       })
       try {
-        const modalResult = await $modal.showModal(AuthInfoModal)
+        const modalResult = await $modal.showModal(
+          AuthInfoModal,
+          {},
+          { closeOnClickOutside: false },
+        )
         if (modalResult?.action === 'confirm' && modalResult.payload?.accepted) {
           next({ name: 'login' })
         } else {
